@@ -1,0 +1,50 @@
+const jwt = require("jsonwebtoken");
+const User = require("../models/user.model");
+
+class AuthController {
+  static async login(req, res) {
+    try {
+      const { email, password } = req.body;
+
+      const user = await User.findOne({ where: { email } });
+      if (!user) {
+        return res
+          .status(401)
+          .json({ message: "Sai email hoặc mật khẩu, vui lòng thử lại" });
+      }
+
+      const isMatched = await user.comparePassword(password);
+      if (!isMatched) {
+        return res
+          .status(401)
+          .json({ message: "Sai email hoặc mật khẩu, vui lòng thử lại" });
+      }
+
+      const token = jwt.sign(
+        {
+          userId: user.userId,
+          role: user.role,
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "8765h",
+        }
+      );
+
+      res.cookie("token", token, {
+        httpOnly: true, // không cho JS truy cập
+        secure: process.env.NODE_ENV === "production", // chỉ bật secure khi deploy HTTPS
+        sameSite: "strict",
+        maxAge: 60 * 60 * 1000 * 8765, // 1 nam
+      });
+
+      res.status(200).json({
+        message: "Đăng nhập thành công",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+}
+
+module.exports = AuthController;
