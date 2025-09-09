@@ -1,6 +1,5 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/sequelize");
-const { v4: uuidv4 } = require("uuid");
 
 const Order = sequelize.define(
   "Order",
@@ -41,6 +40,10 @@ const Order = sequelize.define(
     source: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    status: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
     note: {
       type: DataTypes.TEXT,

@@ -1,5 +1,8 @@
 const Order = require("../models/order.model");
-const { fetchHaravanOrders } = require("../services/haravan.service");
+const {
+  fetchHaravanOrders,
+  countOrdersLastWeek,
+} = require("../services/haravan.service");
 
 class OrderController {
   static async getOrders(req, res) {
@@ -28,6 +31,39 @@ class OrderController {
         });
       }
       res.json({ message: "Đồng bộ thành công" });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+  static async countOrders(req, res) {
+    try {
+      const count = await countOrdersLastWeek();
+      res.json({ count });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+  static async changeOrderStatus(req, res) {
+    try {
+      const { orderId } = req.params; // lấy từ URL /orders/:orderId/status
+      const { status } = req.body; // client gửi { "status": "delivered" }
+
+      const target = await Order.findOne({
+        where: { orderId: orderId },
+      });
+
+      if (!target) {
+        res.status(404).json({
+          message: "Không tìm thấy đơn hàng đó",
+        });
+      }
+
+      target.status = status;
+      await target.save();
+
+      res.json({
+        message: "Cập nhật trạng thái thành công",
+      });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
