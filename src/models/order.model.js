@@ -33,6 +33,10 @@ const Order = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    totalPrice: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
     cancelledStatus: {
       type: DataTypes.ENUM("cancelled", "uncancelled"),
       allowNull: false,

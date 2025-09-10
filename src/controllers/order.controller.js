@@ -2,20 +2,35 @@ const Order = require("../models/order.model");
 const {
   fetchHaravanOrders,
   countOrdersLastWeek,
+  fetchAllHaravanOrders,
 } = require("../services/haravan.service");
 
 class OrderController {
   static async getOrders(req, res) {
     try {
-      const orders = await Order.findAll();
-      res.json(orders);
+      const { page = 1, limit = 50 } = req.query;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await Order.findAndCountAll({
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        order: [["saleDate", "DESC"]],
+        attributes: { exclude: ["id"] },
+      });
+
+      res.json({
+        page: parseInt(page),
+        totalPages: Math.ceil(count / limit),
+        orders: rows,
+      });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   }
+
   static async syncHaravanOrders(req, res) {
     try {
-      const haravanOrders = await fetchHaravanOrders();
+      const haravanOrders = await fetchAllHaravanOrders();
       console.log("✅ Đã fetch từ Haravan:", haravanOrders.length, "orders");
 
       for (const hvOrder of haravanOrders) {
@@ -28,6 +43,7 @@ class OrderController {
             hvOrder.fulfillments?.[0]?.carrier_status_code || "not_deliver",
           source: mappedSource,
           cancelledStatus: hvOrder.cancelled_status,
+          totalPrice: parseFloat(hvOrder.total_price),
         });
       }
       res.json({ message: "Đồng bộ thành công" });
@@ -88,9 +104,9 @@ function getSourceFromHaravanOrder(hvOrder) {
 
       // Tự map theo logic
       if (branchName.includes("Picare Việt Nam")) {
-        source = branchName;
+        source = "Shopee - Picare";
       } else if (branchName.includes("Easydew Việt Nam")) {
-        source = branchName;
+        source = "Shopee - Easydew";
       }
     }
   } else if (hvOrder.source === "tiktokshop") {

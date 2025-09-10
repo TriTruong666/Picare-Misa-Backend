@@ -61,4 +61,32 @@ async function countOrdersLastWeek() {
   }
 }
 
-module.exports = { fetchHaravanOrders, countOrdersLastWeek };
+async function fetchAllHaravanOrders(limit = 50) {
+  try {
+    // B1: lấy tổng số đơn
+    const total = await countOrdersLastWeek();
+    const totalPages = Math.ceil(total / limit);
+
+    console.log(`📦 Tổng ${total} đơn hàng, chia thành ${totalPages} trang`);
+
+    let allOrders = [];
+
+    // B2: loop qua từng page
+    for (let page = 1; page <= totalPages; page++) {
+      console.log(`➡️ Fetch page ${page}/${totalPages}`);
+      const orders = await fetchHaravanOrders(page, limit);
+      allOrders = allOrders.concat(orders);
+    }
+
+    return allOrders;
+  } catch (err) {
+    console.error("❌ Lỗi khi fetchAllHaravanOrders:", err.message);
+    return [];
+  }
+}
+
+module.exports = {
+  fetchHaravanOrders,
+  countOrdersLastWeek,
+  fetchAllHaravanOrders,
+};
