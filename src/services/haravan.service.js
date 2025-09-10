@@ -73,7 +73,7 @@ async function fetchAllHaravanOrders(limit = 50) {
 
     // B2: loop qua từng page
     for (let page = 1; page <= totalPages; page++) {
-      console.log(`➡️ Fetch page ${page}/${totalPages}`);
+      console.log(`➡️ Fetch trang ${page}/${totalPages}`);
       const orders = await fetchHaravanOrders(page, limit);
       allOrders = allOrders.concat(orders);
     }
