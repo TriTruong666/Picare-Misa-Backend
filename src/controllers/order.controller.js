@@ -19,6 +19,7 @@ class OrderController {
       });
 
       res.json({
+        count: count,
         page: parseInt(page),
         totalPages: Math.ceil(count / limit),
         orders: rows,
