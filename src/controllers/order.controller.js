@@ -1,4 +1,5 @@
 const Order = require("../models/order.model");
+const { literal } = require("sequelize");
 const {
   fetchHaravanOrders,
   countOrdersLastWeek,
@@ -8,21 +9,60 @@ const {
 class OrderController {
   static async getOrders(req, res) {
     try {
-      const { page = 1, limit = 50 } = req.query;
-      const offset = (page - 1) * limit;
+      const {
+        page = 1,
+        limit = 50,
+        status: statusParam,
+        financialStatus,
+        carrierStatus,
+      } = req.query;
+      const offset = (Number(page) - 1) * Number(limit);
+
+      const where = {};
+
+      // Nếu có status thì filter
+      if (statusParam !== undefined) {
+        if (statusParam === "true") {
+          where.status = true;
+        } else if (statusParam === "false") {
+          where.status = false;
+        } else {
+          return res
+            .status(400)
+            .json({ error: "status must be true or false" });
+        }
+      }
+
+      if (financialStatus) {
+        where.financialStatus = financialStatus;
+      }
+
+      // Filter carrierStatus nếu có
+      if (carrierStatus) {
+        where.carrierStatus = carrierStatus;
+      }
 
       const { count, rows } = await Order.findAndCountAll({
-        limit: parseInt(limit),
-        offset: parseInt(offset),
-        order: [["saleDate", "DESC"]],
+        where,
+        limit: Number(limit),
+        offset,
+        order: [
+          [
+            literal(
+              `CASE WHEN cancelledStatus = 'cancelled' THEN 1 ELSE 0 END`
+            ),
+            "ASC",
+          ], // cancelled xuống cuối
+          ["saleDate", "DESC"], // trong mỗi nhóm sort theo ngày
+        ],
         attributes: { exclude: ["id"] },
       });
 
       res.json({
-        count: count,
-        page: parseInt(page),
-        totalPages: Math.ceil(count / limit),
-        orders: rows,
+        count, // số đơn theo status filter
+        page: Number(page),
+        totalPages: Math.ceil(count / Number(limit)),
+        orders: rows, // danh sách đơn đã filter
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -34,24 +74,39 @@ class OrderController {
       const haravanOrders = await fetchAllHaravanOrders();
       console.log("✅ Đã fetch từ Haravan:", haravanOrders.length, "orders");
 
+      // Lấy toàn bộ orders trong DB (chỉ lấy orderId + status)
+      const existingOrders = await Order.findAll({
+        attributes: ["orderId", "status"],
+        raw: true,
+      });
+
+      const statusMap = new Map(
+        existingOrders.map((o) => [o.orderId, o.status])
+      );
+
       for (const hvOrder of haravanOrders) {
-        const mappedSource = getSourceFromHaravanOrder(hvOrder);
+        const orderId = hvOrder.order_number.toString();
+
         await Order.upsert({
-          orderId: hvOrder.order_number.toString(),
+          orderId,
           saleDate: hvOrder.created_at.toString(),
           financialStatus: hvOrder.financial_status,
           carrierStatus:
             hvOrder.fulfillments?.[0]?.carrier_status_code || "not_deliver",
-          source: mappedSource,
+          source: getSourceFromHaravanOrder(hvOrder),
           cancelledStatus: hvOrder.cancelled_status,
           totalPrice: parseFloat(hvOrder.total_price),
+          status: statusMap.has(orderId) ? statusMap.get(orderId) : false,
         });
       }
-      res.json({ message: "Đồng bộ thành công" });
+
+      res.json({ message: "Đồng bộ thành công", synced: haravanOrders.length });
     } catch (err) {
+      console.error("❌ syncHaravanOrders error:", err);
       res.status(500).json({ error: err.message });
     }
   }
+
   static async countOrders(req, res) {
     try {
       const count = await countOrdersLastWeek();
@@ -62,8 +117,8 @@ class OrderController {
   }
   static async changeOrderStatus(req, res) {
     try {
-      const { orderId } = req.params; // lấy từ URL /orders/:orderId/status
-      const { status } = req.body; // client gửi { "status": "delivered" }
+      const { orderId } = req.params;
+      const { status } = req.body;
 
       const target = await Order.findOne({
         where: { orderId: orderId },
