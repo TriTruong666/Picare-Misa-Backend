@@ -1,11 +1,8 @@
 const axios = require("axios");
 
-async function fetchHaravanOrders(
-  page = 1,
-  limit = 50,
-  processedAt = "last_week"
-) {
+async function fetchHaravanOrders(page = 1, limit = 50) {
   try {
+    const { created_at_max, created_at_min } = getLast3DaysRangeVN();
     const res = await axios.get(process.env.HARAVAN_API_URL, {
       headers: {
         Authorization: `Bearer ${process.env.HARAVAN_TOKEN}`,
@@ -14,7 +11,8 @@ async function fetchHaravanOrders(
       params: {
         page: page,
         limit: limit,
-        processed_at: processedAt,
+        created_at_min: created_at_min,
+        created_at_max: created_at_max,
       },
     });
     return res.data.orders || [];
@@ -24,13 +22,13 @@ async function fetchHaravanOrders(
   }
 }
 
-function getLast7DaysRangeVN() {
+function getLast3DaysRangeVN() {
   const now = new Date();
 
   const max = new Date(now);
   const min = new Date(now);
 
-  min.setDate(now.getDate() - 7);
+  min.setDate(now.getDate() - 3);
 
   const created_at_min = new Date(
     min.getTime() - min.getTimezoneOffset() * 60000
@@ -44,7 +42,7 @@ function getLast7DaysRangeVN() {
 
 async function countOrdersLastWeek() {
   try {
-    const { created_at_max, created_at_min } = getLast7DaysRangeVN();
+    const { created_at_max, created_at_min } = getLast3DaysRangeVN();
     const res = await axios.get(process.env.HARAVAN_COUNT_API_URL, {
       headers: {
         Authorization: `Bearer ${process.env.HARAVAN_TOKEN}`,

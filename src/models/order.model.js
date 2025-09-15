@@ -14,6 +14,11 @@ const Order = sequelize.define(
       allowNull: false,
       unique: true,
     },
+    haravanId: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      unique: true,
+    },
     saleDate: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -33,7 +38,19 @@ const Order = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    realCarrierStatus: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     totalPrice: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    totalLineItemPrice: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    totalDiscountPrice: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
@@ -46,8 +63,8 @@ const Order = sequelize.define(
       allowNull: false,
     },
     status: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      type: DataTypes.ENUM("invoice", "stock", "pending"),
+      allowNull: true,
     },
     note: {
       type: DataTypes.TEXT,

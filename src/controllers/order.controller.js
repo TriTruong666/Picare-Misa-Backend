@@ -1,5 +1,6 @@
 const Order = require("../models/order.model");
-const { literal } = require("sequelize");
+const OrderDetail = require("../models/order_detail.model");
+const { literal, Op } = require("sequelize");
 const {
   fetchHaravanOrders,
   countOrdersLastWeek,
@@ -12,25 +13,21 @@ class OrderController {
       const {
         page = 1,
         limit = 50,
-        status: statusParam,
+        status,
         financialStatus,
         carrierStatus,
+        realCarrierStatus,
+        source,
+        cancelledStatus,
+        orderId,
       } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
       const where = {};
 
       // Nếu có status thì filter
-      if (statusParam !== undefined) {
-        if (statusParam === "true") {
-          where.status = true;
-        } else if (statusParam === "false") {
-          where.status = false;
-        } else {
-          return res
-            .status(400)
-            .json({ error: "status must be true or false" });
-        }
+      if (status) {
+        where.status = status;
       }
 
       if (financialStatus) {
@@ -39,7 +36,23 @@ class OrderController {
 
       // Filter carrierStatus nếu có
       if (carrierStatus) {
-        where.carrierStatus = carrierStatus;
+        const cstatus = carrierStatus.split(",");
+        where.carrierStatus = { [Op.in]: cstatus };
+      }
+
+      if (realCarrierStatus) {
+        where.realCarrierStatus = realCarrierStatus;
+      }
+      if (cancelledStatus) {
+        where.cancelledStatus = cancelledStatus;
+      }
+      if (source) {
+        const sources = source.split(","); // tách chuỗi thành mảng
+        where.source = { [Op.in]: sources };
+      }
+
+      if (orderId) {
+        where.orderId = { [Op.like]: `%${orderId}%` };
       }
 
       const { count, rows } = await Order.findAndCountAll({
@@ -68,39 +81,67 @@ class OrderController {
       res.status(500).json({ error: err.message });
     }
   }
-
-  static async syncHaravanOrders(req, res) {
+  static async getDetailOrder(req, res) {
     try {
-      const haravanOrders = await fetchAllHaravanOrders();
-      console.log("✅ Đã fetch từ Haravan:", haravanOrders.length, "orders");
+      const { orderId } = req.params;
 
-      // Lấy toàn bộ orders trong DB (chỉ lấy orderId + status)
-      const existingOrders = await Order.findAll({
-        attributes: ["orderId", "status"],
-        raw: true,
+      const order = await Order.findOne({
+        where: { orderId },
+        attributes: { exclude: ["id"] },
+        include: [
+          {
+            model: OrderDetail,
+            as: "line_items",
+            attributes: { exclude: ["id", "orderId"] },
+          },
+        ],
       });
 
-      const statusMap = new Map(
-        existingOrders.map((o) => [o.orderId, o.status])
-      );
-
-      for (const hvOrder of haravanOrders) {
-        const orderId = hvOrder.order_number.toString();
-
-        await Order.upsert({
-          orderId,
-          saleDate: hvOrder.created_at.toString(),
-          financialStatus: hvOrder.financial_status,
-          carrierStatus:
-            hvOrder.fulfillments?.[0]?.carrier_status_code || "not_deliver",
-          source: getSourceFromHaravanOrder(hvOrder),
-          cancelledStatus: hvOrder.cancelled_status,
-          totalPrice: parseFloat(hvOrder.total_price),
-          status: statusMap.has(orderId) ? statusMap.get(orderId) : false,
+      if (!order) {
+        return res.status(404).json({
+          message: "không tìm thấy đơn hàng",
         });
       }
 
-      res.json({ message: "Đồng bộ thành công", synced: haravanOrders.length });
+      res.json(order);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async searchOrders(req, res) {
+    try {
+      const { orderId } = req.query;
+
+      if (!orderId) {
+        return res.status(400).json({ message: "" });
+      }
+
+      const orders = await Order.findAll({
+        where: {
+          orderId: {
+            [Op.like]: `%${orderId}%`, // tìm gần đúng
+          },
+        },
+        attributes: { exclude: ["id"] },
+        order: [["saleDate", "DESC"]],
+      });
+
+      if (!orders || orders.length === 0) {
+        return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+      }
+
+      res.json(orders);
+    } catch (err) {
+      console.error("❌ searchOrders error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async syncHaravanOrders(req, res) {
+    try {
+      const result = await runSyncHaravanOrders();
+      res.json({ message: "Đồng bộ thành công", ...result });
     } catch (err) {
       console.error("❌ syncHaravanOrders error:", err);
       res.status(500).json({ error: err.message });
@@ -142,6 +183,57 @@ class OrderController {
   }
 }
 
+async function runSyncHaravanOrders() {
+  const haravanOrders = await fetchAllHaravanOrders();
+  console.log("✅ Đã fetch từ Haravan:", haravanOrders.length, "orders");
+
+  const existingOrders = await Order.findAll({
+    attributes: ["orderId"],
+    where: { status: { [Op.not]: null } },
+    raw: true,
+  });
+  const processedOrderIds = new Set(existingOrders.map((o) => o.orderId));
+
+  for (const hvOrder of haravanOrders) {
+    const orderId = hvOrder.order_number.toString();
+
+    if (processedOrderIds.has(orderId)) continue;
+
+    await Order.upsert({
+      orderId,
+      haravanId: hvOrder.number,
+      saleDate: hvOrder.created_at.toString(),
+      financialStatus: hvOrder.financial_status,
+      carrierStatus:
+        hvOrder.fulfillments?.[0]?.carrier_status_code || "not_deliver",
+      realCarrierStatus:
+        hvOrder.fulfillments?.[0]?.status || "not_real_deliver",
+      source: getSourceFromHaravanOrder(hvOrder),
+      cancelledStatus: hvOrder.cancelled_status,
+      totalPrice: parseFloat(hvOrder.total_price),
+      totalLineItemPrice: parseFloat(hvOrder.total_line_items_price),
+      totalDiscountPrice: parseFloat(hvOrder.total_discounts),
+      status: "pending",
+    });
+
+    await OrderDetail.destroy({ where: { orderId } });
+
+    const lineItems = hvOrder.line_items.map((item) => ({
+      orderId,
+      sku: item.sku,
+      price: parseFloat(item.price),
+      qty: item.quantity,
+      productName: item.title,
+    }));
+
+    if (lineItems.length > 0) {
+      await OrderDetail.bulkCreate(lineItems);
+    }
+  }
+
+  return { synced: haravanOrders.length };
+}
+
 function getSourceFromHaravanOrder(hvOrder) {
   let source = "";
 
@@ -181,3 +273,4 @@ function getSourceFromHaravanOrder(hvOrder) {
 }
 
 module.exports = OrderController;
+exports.runSyncHaravanOrders = runSyncHaravanOrders;

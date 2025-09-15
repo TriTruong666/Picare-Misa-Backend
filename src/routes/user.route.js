@@ -1,9 +1,11 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const UserController = require("../controllers/user.controller");
+const authMiddleware = require("../middlewares/middleware");
 const router = express.Router();
 
 router.get("/", UserController.getUsers);
+router.get("/me", authMiddleware, UserController.getMe); // đặt trước
 router.get("/:userId", UserController.getUser);
 router.post(
   "/",

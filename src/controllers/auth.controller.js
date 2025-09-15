@@ -16,7 +16,7 @@ class AuthController {
       const isMatched = await user.comparePassword(password);
       if (!isMatched) {
         return res
-          .status(401)
+          .status(200)
           .json({ message: "Sai email hoặc mật khẩu, vui lòng thử lại" });
       }
 
@@ -27,7 +27,7 @@ class AuthController {
         },
         process.env.JWT_SECRET,
         {
-          expiresIn: "8765h",
+          expiresIn: "24h",
         }
       );
 
@@ -35,10 +35,10 @@ class AuthController {
         httpOnly: true, // không cho JS truy cập
         secure: process.env.NODE_ENV === "production", // chỉ bật secure khi deploy HTTPS
         sameSite: "strict",
-        maxAge: 60 * 60 * 1000 * 8765, // 1 nam
+        maxAge: 60 * 60 * 1000 * 24,
       });
 
-      res.status(200).json({
+      res.json({
         message: "Đăng nhập thành công",
       });
     } catch (error) {
