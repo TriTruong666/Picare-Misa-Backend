@@ -32,12 +32,11 @@ class AuthController {
       );
 
       res.cookie("token", token, {
-        httpOnly: true, // không cho JS truy cập
-        secure: process.env.NODE_ENV === "production", // chỉ bật secure khi deploy HTTPS
-        sameSite: "strict",
-        maxAge: 60 * 60 * 1000 * 24,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000, // 1 ngày
       });
-
       res.json({
         message: "Đăng nhập thành công",
       });
@@ -50,7 +49,7 @@ class AuthController {
       res.clearCookie("token", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       });
 
       res.json({
