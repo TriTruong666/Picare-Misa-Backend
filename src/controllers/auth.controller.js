@@ -45,6 +45,21 @@ class AuthController {
       res.status(500).json({ error: error.message });
     }
   }
+  static async logout(req, res) {
+    try {
+      res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+
+      res.json({
+        message: "Đăng xuất thành công",
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = AuthController;

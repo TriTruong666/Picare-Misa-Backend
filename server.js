@@ -11,6 +11,11 @@ const authRoutes = require("./src/routes/auth.route");
 const { sseHandler } = require("./src/config/sse");
 const adminSeed = require("./src/seeds/adminSeed");
 
+const NEXT_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.CLIENT_URL
+    : "http://localhost:3000";
+
 const app = express();
 
 // Middleware
@@ -19,7 +24,7 @@ app.use(morgan("dev"));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:3000",
+    origin: NEXT_URL,
     credentials: true, // cho phép gửi cookie
   })
 );

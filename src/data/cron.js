@@ -102,7 +102,7 @@ cron.schedule("*/29 * * * *", () => {
   });
 });
 
-cron.schedule("40,29 * * * *", () => {
+cron.schedule("40 29 * * * *", () => {
   sendSse({
     status: "warning",
     message:
