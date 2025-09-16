@@ -94,7 +94,7 @@ function getSourceFromHaravanOrder(hvOrder) {
   return source;
 }
 
-cron.schedule("*/29 * * * *", () => {
+cron.schedule("0 29 * * * *", () => {
   sendSse({
     status: "warning",
     message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
@@ -113,7 +113,7 @@ cron.schedule("40 29 * * * *", () => {
 });
 
 // Job đồng bộ chính, chạy mỗi 30 phút
-cron.schedule("*/30 * * * *", async () => {
+cron.schedule("0 30 * * * *", async () => {
   try {
     sendSse({
       status: "running",
