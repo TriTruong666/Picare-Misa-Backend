@@ -35,7 +35,7 @@ app.use("/api/auth", authRoutes);
     await sequelize.authenticate();
     console.log("✅ Đã kết nối với SQL Server thông qua Sequelize");
 
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
     console.log("Tất cả Models đã được đồng bộ hoá");
 
     await seedingUsers(); // seed sau khi sync
