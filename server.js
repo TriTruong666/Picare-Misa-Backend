@@ -9,7 +9,7 @@ const userRoutes = require("./src/routes/user.route");
 const orderRoutes = require("./src/routes/order.route");
 const authRoutes = require("./src/routes/auth.route");
 const { sseHandler } = require("./src/config/sse");
-const adminSeed = require("./src/seeds/adminSeed");
+const seedingUsers = require("./src/seeds/userSeed");
 
 const app = express();
 
@@ -35,10 +35,10 @@ app.use("/api/auth", authRoutes);
     await sequelize.authenticate();
     console.log("✅ Đã kết nối với SQL Server thông qua Sequelize");
 
-    await sequelize.sync();
+    await sequelize.sync({ force: true });
     console.log("Tất cả Models đã được đồng bộ hoá");
 
-    await adminSeed(); // seed sau khi sync
+    await seedingUsers(); // seed sau khi sync
 
     const PORT = process.env.SERVER_PORT || 8686;
     app.listen(PORT, () => {

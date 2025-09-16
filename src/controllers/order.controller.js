@@ -2,7 +2,6 @@ const Order = require("../models/order.model");
 const OrderDetail = require("../models/order_detail.model");
 const { literal, Op } = require("sequelize");
 const {
-  fetchHaravanOrders,
   countOrdersLastWeek,
   fetchAllHaravanOrders,
 } = require("../services/haravan.service");

@@ -11,7 +11,7 @@ const OrderDetail = sequelize.define(
       autoIncrement: true,
     },
     orderId: {
-      type: DataTypes.STRING(100), // match với Order.orderId
+      type: DataTypes.STRING(100),
       allowNull: false,
     },
     sku: {

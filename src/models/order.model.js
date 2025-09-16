@@ -63,7 +63,7 @@ const Order = sequelize.define(
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM("invoice", "stock", "pending"),
+      type: DataTypes.ENUM("invoice", "stock", "pending", "completed"),
       allowNull: true,
     },
     note: {
