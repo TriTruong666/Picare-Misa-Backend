@@ -100,6 +100,7 @@ cron.schedule("29,59 * * * *", () => {
     message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
     type: "notification",
   });
+  console.log("Prepare Sync...");
 });
 
 // Job đồng bộ chính, chạy mỗi 30 phút
@@ -122,4 +123,11 @@ cron.schedule("0,30 * * * *", async () => {
   } catch (err) {
     sendSse({ status: "error", message: `❌ Lỗi: ${err.message}` });
   }
+});
+
+cron.schedule("*/30 * * * * *", () => {
+  sendSse({
+    status: "health",
+    message: "Server Online",
+  });
 });
