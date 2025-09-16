@@ -1,5 +1,5 @@
 const express = require("express");
-const OrderController = require("../controllers/order.controller");
+const { OrderController } = require("../controllers/order.controller");
 const { authorizeRoles, authMiddleware } = require("../middlewares/middleware");
 const router = express.Router();
 
@@ -24,4 +24,10 @@ router.put(
   OrderController.changeOrderStatus
 );
 
+router.put(
+  "/scan",
+  authMiddleware,
+  authorizeRoles("admin", "staff"),
+  OrderController.scanOrder
+);
 module.exports = router;

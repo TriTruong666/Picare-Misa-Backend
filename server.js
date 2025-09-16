@@ -35,10 +35,10 @@ app.use("/api/auth", authRoutes);
     await sequelize.authenticate();
     console.log("✅ Đã kết nối với SQL Server thông qua Sequelize");
 
-    await sequelize.sync();
+    await sequelize.sync({ force: true });
     console.log("Tất cả Models đã được đồng bộ hoá");
 
-    await seedingUsers(); // seed sau khi sync
+    await seedingUsers();
 
     const PORT = process.env.SERVER_PORT || 8686;
     app.listen(PORT, () => {

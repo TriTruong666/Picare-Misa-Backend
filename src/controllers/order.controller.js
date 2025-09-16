@@ -80,6 +80,35 @@ class OrderController {
       res.status(500).json({ error: err.message });
     }
   }
+  static async scanOrder(req, res) {
+    try {
+      const { trackingNumber } = req.body;
+
+      const scannedOrder = await Order.findOne({
+        where: { trackingNumber },
+      });
+
+      if (!scannedOrder) {
+        return res.status(200).json({
+          message: "Không tìm thấy đơn hàng này",
+        });
+      }
+
+      if (scannedOrder.status === "stock") {
+        return res.status(200).json({
+          message: "Đơn hàng này đã quét rồi",
+        });
+      }
+
+      scannedOrder.status = "stock";
+      await scannedOrder.save();
+      res.json({
+        message: "Quét barcode thành công",
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
   static async getDetailOrder(req, res) {
     try {
       const { orderId } = req.params;
@@ -212,6 +241,7 @@ async function runSyncHaravanOrders() {
       totalPrice: parseFloat(hvOrder.total_price),
       totalLineItemPrice: parseFloat(hvOrder.total_line_items_price),
       totalDiscountPrice: parseFloat(hvOrder.total_discounts),
+      trackingNumber: hvOrder.fulfillments?.[0]?.tracking_number || null,
       status: "pending",
     });
 
@@ -246,7 +276,6 @@ function getSourceFromHaravanOrder(hvOrder) {
     );
 
     if (branchAttr && branchAttr.value) {
-      // Lấy nguyên giá trị branchName
       const branchName = branchAttr.value;
 
       // Tự map theo logic
@@ -271,5 +300,4 @@ function getSourceFromHaravanOrder(hvOrder) {
   return source;
 }
 
-module.exports = OrderController;
-exports.runSyncHaravanOrders = runSyncHaravanOrders;
+module.exports = { OrderController, runSyncHaravanOrders };

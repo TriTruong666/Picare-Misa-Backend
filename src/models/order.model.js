@@ -58,6 +58,10 @@ const Order = sequelize.define(
       type: DataTypes.ENUM("cancelled", "uncancelled"),
       allowNull: false,
     },
+    trackingNumber: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     source: {
       type: DataTypes.STRING,
       allowNull: false,

@@ -27,7 +27,7 @@ class AuthController {
         },
         process.env.JWT_SECRET,
         {
-          expiresIn: "24h",
+          expiresIn: "168h",
         }
       );
 
@@ -36,7 +36,7 @@ class AuthController {
         secure: true,
         sameSite: "none",
         path: "/",
-        maxAge: 24 * 60 * 60 * 1000, // 1 ngày
+        maxAge: 168 * 60 * 60 * 1000, // 1 ngày
       });
       res.json({
         message: "Đăng nhập thành công",
