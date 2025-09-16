@@ -1,14 +1,15 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
 const UserController = require("../controllers/user.controller");
-const authMiddleware = require("../middlewares/middleware");
+const { authMiddleware } = require("../middlewares/middleware");
 const router = express.Router();
 
-router.get("/", UserController.getUsers);
+router.get("/", authMiddleware, UserController.getUsers);
 router.get("/me", authMiddleware, UserController.getMe); // đặt trước
-router.get("/:userId", UserController.getUser);
+router.get("/:userId", authMiddleware, UserController.getUser);
 router.post(
   "/",
+  authMiddleware,
   [
     body("name").notEmpty().withMessage("Tên không được để trống"),
     body("email").isEmail().withMessage("Email không hợp lệ"),
