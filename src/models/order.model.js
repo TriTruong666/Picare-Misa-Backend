@@ -62,6 +62,10 @@ const Order = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    isSPXFast: {
+      type: DataTypes.ENUM("normal", "fast"),
+      allowNull: false,
+    },
     source: {
       type: DataTypes.STRING,
       allowNull: false,

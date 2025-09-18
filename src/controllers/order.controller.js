@@ -82,11 +82,20 @@ class OrderController {
   }
   static async scanOrder(req, res) {
     try {
-      const { trackingNumber } = req.body;
+      const { trackingNumber, orderId } = req.body;
+      const { isSPXFast } = req.query;
 
-      const scannedOrder = await Order.findOne({
-        where: { trackingNumber },
-      });
+      let scannedOrder;
+
+      if (isSPXFast === "fast") {
+        scannedOrder = await Order.findOne({
+          where: { orderId: orderId.trim() },
+        });
+      } else if (isSPXFast === "normal") {
+        scannedOrder = await Order.findOne({
+          where: { trackingNumber: trackingNumber.trim() },
+        });
+      }
 
       if (!scannedOrder) {
         return res.status(200).json({
@@ -100,15 +109,33 @@ class OrderController {
         });
       }
 
+      if (scannedOrder.status === "invoice") {
+        return res.status(200).json({
+          message: "Đơn này đã được xuất hoá đơn",
+        });
+      }
+
+      if (
+        scannedOrder.realCarrierStatus === "success" ||
+        scannedOrder.carrierStatus === "delivered"
+      ) {
+        return res.status(200).json({
+          message: "Đơn này chỉ có thể xuất hoá đơn",
+        });
+      }
+
       scannedOrder.status = "stock";
       await scannedOrder.save();
+
       res.json({
         message: "Quét barcode thành công",
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
+      console.log(err);
     }
   }
+
   static async getDetailOrder(req, res) {
     try {
       const { orderId } = req.params;
@@ -237,6 +264,10 @@ async function runSyncHaravanOrders() {
       realCarrierStatus:
         hvOrder.fulfillments?.[0]?.status || "not_real_deliver",
       source: getSourceFromHaravanOrder(hvOrder),
+      isSPXFast:
+        hvOrder.fulfillments?.[0]?.tracking_company === "Siêu Tốc - 4 Giờ"
+          ? "fast"
+          : "normal",
       cancelledStatus: hvOrder.cancelled_status,
       totalPrice: parseFloat(hvOrder.total_price),
       totalLineItemPrice: parseFloat(hvOrder.total_line_items_price),
