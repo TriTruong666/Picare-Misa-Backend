@@ -8,6 +8,8 @@ const sequelize = require("./src/config/sequelize");
 const userRoutes = require("./src/routes/user.route");
 const orderRoutes = require("./src/routes/order.route");
 const authRoutes = require("./src/routes/auth.route");
+const analyticsRoutes = require("./src/routes/analytics.route");
+const misaRoutes = require("./src/routes/misa.route");
 const { sseHandler } = require("./src/config/sse");
 const seedingUsers = require("./src/seeds/userSeed");
 
@@ -29,6 +31,8 @@ app.get("/api/events", sseHandler);
 app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/misa", misaRoutes);
 // Start server
 (async () => {
   try {

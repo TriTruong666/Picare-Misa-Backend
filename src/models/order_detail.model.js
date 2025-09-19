@@ -40,13 +40,13 @@ const OrderDetail = sequelize.define(
 Order.hasMany(OrderDetail, {
   foreignKey: "orderId",
   sourceKey: "orderId",
-  as: "line_items", // 👈 alias mong muốn
+  as: "line_items",
 });
 
 OrderDetail.belongsTo(Order, {
   foreignKey: "orderId",
   targetKey: "orderId",
-  as: "order", // alias ngược lại
+  as: "order",
 });
 
 module.exports = OrderDetail;
