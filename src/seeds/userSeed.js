@@ -18,13 +18,13 @@ async function seedingUsers() {
           email: u.email,
           password: u.password,
         });
-        console.log(`✅ User ${u.email} đã được tạo thành công`);
+        console.log(`User ${u.email} đã được tạo thành công`);
       } else {
-        console.log(`⚠️ User ${u.email} đã tồn tại`);
+        console.log(`User ${u.email} đã tồn tại`);
       }
     }
   } catch (error) {
-    console.error("❌ Lỗi khi seed users:", error.message);
+    console.error(" Lỗi khi seed users:", error.message);
   }
 }
 

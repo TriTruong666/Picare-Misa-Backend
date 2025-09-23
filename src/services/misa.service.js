@@ -23,7 +23,7 @@ async function connectAmisMisa() {
     );
     return JSON.parse(res.data.Data);
   } catch (err) {
-    console.error(`❌ Misa Error:`, err.message);
+    console.error(` Misa Error:`, err.message);
   }
 }
 
@@ -48,7 +48,7 @@ async function postMisaDataService(accessToken, type = 1) {
     );
     return JSON.parse(res.data.Data);
   } catch (err) {
-    console.error(`❌ Misa Error:`, err.message);
+    console.error(` Misa Error:`, err.message);
   }
 }
 
@@ -257,7 +257,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
     return res.data;
   } catch (err) {
-    console.error("❌ Misa Error:", err.message);
+    console.error(" Misa Error:", err.message);
     throw err;
   }
 }

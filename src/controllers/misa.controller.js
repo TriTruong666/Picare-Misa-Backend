@@ -29,7 +29,6 @@ class MisaController {
         });
       }
 
-      // ✅ lấy token từ DB
       const config = await MisaConfig.findByPk(1);
       if (!config || !config.accessToken) {
         return res.status(400).json({
@@ -47,7 +46,6 @@ class MisaController {
 
   static async syncAllMisa(req, res) {
     try {
-      // ✅ lấy token từ DB
       const config = await MisaConfig.findByPk(1);
       if (!config || !config.accessToken) {
         return res.status(400).json({
@@ -57,7 +55,7 @@ class MisaController {
 
       console.log("=== BẮT ĐẦU SYNC TẤT CẢ DỮ LIỆU MISA ===");
 
-      const [cusResult, productResult, stockResult] = await Promise.all([
+      await Promise.all([
         syncDataMisa(config.accessToken, 1),
         syncDataMisa(config.accessToken, 2),
         syncDataMisa(config.accessToken, 3),
@@ -67,18 +65,29 @@ class MisaController {
 
       res.json({
         message: "Đồng bộ tất cả dữ liệu MISA thành công",
-        success: true,
-        results: {
-          customers: cusResult.total,
-          products: productResult.total,
-          stocks: stockResult.total,
-        },
       });
     } catch (err) {
-      console.error("❌ Lỗi khi sync MISA:", err);
+      console.error(" Lỗi khi sync MISA:", err);
       res.status(500).json({ error: err.message });
     }
   }
+
+  static async countMisaData(req, res) {
+    try {
+      const customerCount = await MisaCustomer.findAndCountAll();
+      const productCount = await MisaProduct.findAndCountAll();
+      const stockCount = await MisaStock.findAndCountAll();
+
+      res.json({
+        customers: customerCount.count,
+        products: productCount.count,
+        stocks: stockCount.count,
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
   static async buildOrderMisa(req, res) {
     try {
       const { orderId } = req.body;
@@ -103,7 +112,7 @@ class MisaController {
         data: result,
       });
     } catch (err) {
-      console.error("❌ buildOrderMisa Error:", err);
+      console.error(" buildOrderMisa Error:", err);
       res.status(500).json({ error: err.message });
     }
   }
@@ -131,8 +140,8 @@ class MisaController {
       const config = await MisaConfig.findOne({
         where: { id: 1 },
         attributes: {
-          exclude: ["id"]
-        }
+          exclude: ["id"],
+        },
       });
 
       res.json(config);

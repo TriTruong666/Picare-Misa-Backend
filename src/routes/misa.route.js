@@ -6,6 +6,7 @@ const { authorizeRoles, authMiddleware } = require("../middlewares/middleware");
 router.get("/stock", MisaController.getMisaStock);
 router.get("/customer", MisaController.getMisaAccount);
 router.get("/config", MisaController.getMisaConfig);
+router.get("/data_count", MisaController.countMisaData);
 router.post("/connect", MisaController.connectToMisa);
 router.post("/sync_dictionary", MisaController.syncMisa);
 router.post("/sync_dictionary/all", MisaController.syncAllMisa);

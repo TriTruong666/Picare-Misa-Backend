@@ -17,7 +17,7 @@ async function fetchHaravanOrders(page = 1, limit = 50) {
     });
     return res.data.orders || [];
   } catch (err) {
-    console.error(`❌ Lỗi khi fetch page ${page}:`, err.message);
+    console.error(` Lỗi khi fetch page ${page}:`, err.message);
     return [];
   }
 }
@@ -55,7 +55,7 @@ async function countOrdersLastWeek() {
     });
     return res.data.count;
   } catch (err) {
-    console.error(`❌ Lỗi khi count:`, err.message);
+    console.error(` Lỗi khi count:`, err.message);
   }
 }
 
@@ -78,7 +78,7 @@ async function fetchAllHaravanOrders(limit = 50) {
 
     return allOrders;
   } catch (err) {
-    console.error("❌ Lỗi khi fetchAllHaravanOrders:", err.message);
+    console.error(" Lỗi khi fetchAllHaravanOrders:", err.message);
     return [];
   }
 }

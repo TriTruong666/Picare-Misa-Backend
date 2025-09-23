@@ -10,7 +10,7 @@ const MisaConfig = require("../models/misa_config.model");
 async function runMisaCron() {
   try {
     await initialMisaConnection();
-    console.log("✅ Đã kết nối MISA");
+    console.log("Đã kết nối MISA");
 
     const config = await MisaConfig.findByPk(1);
     if (!config || !config.accessToken) {
@@ -25,13 +25,13 @@ async function runMisaCron() {
       syncDataMisa(accessToken, 3),
     ]);
 
-    console.log("✅ Đồng bộ thành công:", {
+    console.log("Đồng bộ thành công:", {
       customers: cus.total,
       products: product.total,
       stocks: stock.total,
     });
   } catch (err) {
-    console.error("❌ Cron MISA Error:", err.message);
+    console.error(" Cron MISA Error:", err.message);
   }
 }
 cron.schedule("0,20,40 * * * *", runMisaCron);
@@ -63,7 +63,7 @@ cron.schedule("0,30 * * * *", async () => {
       isBlocked: false,
     });
   } catch (err) {
-    sendSse({ status: "error", message: `❌ Lỗi: ${err.message}` });
+    sendSse({ status: "error", message: ` Lỗi: ${err.message}` });
   }
 });
 

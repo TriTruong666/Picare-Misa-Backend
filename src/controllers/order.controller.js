@@ -188,7 +188,7 @@ class OrderController {
 
       res.json(orders);
     } catch (err) {
-      console.error("❌ searchOrders error:", err);
+      console.error(" searchOrders error:", err);
       res.status(500).json({ error: err.message });
     }
   }
@@ -198,7 +198,7 @@ class OrderController {
       const result = await runSyncHaravanOrders();
       res.json({ message: "Đồng bộ thành công", ...result });
     } catch (err) {
-      console.error("❌ syncHaravanOrders error:", err);
+      console.error(" syncHaravanOrders error:", err);
       res.status(500).json({ error: err.message });
     }
   }
@@ -240,7 +240,7 @@ class OrderController {
 
 async function runSyncHaravanOrders() {
   const haravanOrders = await fetchAllHaravanOrders();
-  console.log("✅ Đã fetch từ Haravan:", haravanOrders.length, "orders");
+  console.log("Đã fetch từ Haravan:", haravanOrders.length, "orders");
 
   const existingOrders = await Order.findAll({
     attributes: ["orderId"],
