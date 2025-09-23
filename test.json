@@ -1,0 +1,96 @@
+body: 
+{
+  "org_company_code": "k6aguh1l",
+  "app_id": "45c54c00-0c02-4997-aab2-f8d56f8ff314",
+  "voucher": [
+    {
+      "voucher_type": 20,
+      "is_get_new_id": true,
+      "is_allow_group": false,
+      "org_refid": "650ad5d2-cb0e-4b8f-b53c-522bb80a6d80", // Guid trùng với ID refid của detail
+      "org_reftype": 3520,
+      "org_reftype_name": "Đơn đặt hàng",
+      "act_voucher_type": 0,
+      "refid": "650ad5d2-cb0e-4b8f-b53c-522bb80a6d80", // Guid
+      "refno": "GH09250810", // Mã đơn ebiz
+      "custom_field1": 36609408, // Mã đơn hàng
+      "org_refno": "GH09250810",
+      "refno_finance": "GH09250810",
+      "branch_id": "f8088e57-2ec5-4ddc-943e-783179ad001d", // Chi nhánh của Công ty
+      "account_object_id": "e7f4ff3f-2eb9-40f1-99e1-564de1c7e677", // Mã khách hàng
+      "account_object_address": "2/35 Chấn Hưng, Phường Tân Hoà, Thành phố Hồ Chí Minh", // Địa chỉ khách hàng
+      "status": 0,
+      "delivered_status": 0,
+      "due_day": 0, // Ngày nợ
+      "refdate": "2025-09-01T09:32:51+07:00", // Ngày đặt hàng
+      "is_calculated_cost": false,
+      "exchange_rate": 1,
+      "account_object_name": "THUỐC SỈ", // Tên khách hàng
+      "account_object_code": "ECM006", // Mã khách hàng
+      "journal_memo": "(API) Đơn hàng THUỐC SỈ - Mã đơn hàng: 36609408", //Nội dung ghi chú
+      "shipping_address": "2/35 Chấn Hưng, Phường Tân Hoà, Thành phố Hồ Chí Minh", // Địa chỉ giao hàng 
+      "currency_id": "VND",
+      "discount_type": 1,
+      "discount_rate_voucher": 0,
+      "total_amount_oc": 74074.07407407407, // Tổng tiền trước thuế
+      "total_amount": 74074.07407407407, // Tổng tiền trước thuế
+      "total_sale_amount": 74074.07407407407, // Tổng tiền trước thuế
+      "total_sale_amount_oc": 74074.07407407407, // Tổng tiền trước thuế
+      "total_invoice_amount": 74074.07407407407, // Tổng tiền trước thuế
+      "total_invoice_amount_oc": 74074.07407407407, // Tổng tiền trước thuế
+      "total_vat_amount_oc": 5925.925925925926, // Tổng tiền thuế
+      "total_amount_made": 0,
+      "revenue_status": 0,
+      "total_receipted_amount": 0,
+      "is_invoiced": false,
+      "check_quantity": false,
+      "excel_row_index": 0,
+      "is_valid": false,
+      "reftype": 3520,
+      "auto_refno": true,
+      "state": 0,
+      "detail": [
+        {
+          "ref_detail_id": "57ac99e5-9288-4268-b59e-c271a1ce3220", // GUid đổi 1 Guid khác nếu thêm detail
+          "refid": "650ad5d2-cb0e-4b8f-b53c-522bb80a6d80", // Giống Refid order
+          "org_refid": "650ad5d2-cb0e-4b8f-b53c-522bb80a6d80", // Giống Refid order
+          "inventory_item_id": "410d74aa-b99d-4a14-9673-0ee48aba294f", // Mã sản phẩm
+          "inventory_item_type": 0,
+          "stock_id": "ead48edd-a018-437f-9450-f33a2b761e65", // Mã kho
+          "stock_code": "KHO_CHAN_HUNG", //Mã kho người dùng"stock_name": "KHO CHẤN HƯNG", // Tên kho
+          "unit_id": "6aa444f8-bf60-445f-8e6a-00222bfe1922", // Mã đơn vị tính
+          "account_object_id": "e7f4ff3f-2eb9-40f1-99e1-564de1c7e677", // Mã khách hàng
+          "sort_order": 1, // Tăng theo thứ tự đơn
+          "is_promotion": false,
+          "quantity": 1,
+          "amount": 74074.07407407407, // Giá trước thuế
+          "amount_oc": 74074.07407407407, // Giá trước thuế
+          "discount_rate": null,
+          "main_convert_rate": null,
+          "main_quantity": 1,
+          "main_unit_id": "6aa444f8-bf60-445f-8e6a-00222bfe1922", // ID ĐVT map qua bảng bán hàng
+          "main_unit_name": "Hộp", // ĐVT
+          "main_unit_price": 74074.07407407407, // Giá trước thuế
+          "discount_amount": 0,
+          "vat_rate": 8, //Thuế trong bảng inventory
+          "vat_amount_oc": 5925.925925925926, // Thuế sản phẩm
+          "vat_amount": 5925.925925925926, // Thuế sản phẩm
+          "description": "Fixderma Lip Balm 15Ml", // Tên sản phẩm
+          "inventory_item_name": "Fixderma Lip Balm 15Ml", // Tên sản phẩm
+          "exchange_rate_operator": "*",
+          "inventory_item_code": "FIX038", // Mã sản phẩm
+          "unit_name": "Hộp",
+          "unit_price": 74074.07407407407, // Giá trước thuế
+          "is_unit_price_after_tax": false,
+          "quantity_delivered": 0,
+          "quantity_remain": 0,
+          "status": 0,
+          "is_description": false,
+          "discount_type": 1,
+          "discount_rate_voucher": 0,
+          "state": 1
+        }
+      ]
+    }
+  ]
+}

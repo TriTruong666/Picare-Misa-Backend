@@ -3,8 +3,11 @@ const router = express.Router();
 const { MisaController } = require("../controllers/misa.controller");
 const { authorizeRoles, authMiddleware } = require("../middlewares/middleware");
 
+router.get("/stock", MisaController.getMisaStock);
+router.get("/customer", MisaController.getMisaAccount);
+router.get("/config", MisaController.getMisaConfig);
 router.post("/connect", MisaController.connectToMisa);
 router.post("/sync_dictionary", MisaController.syncMisa);
 router.post("/sync_dictionary/all", MisaController.syncAllMisa);
-
+router.post("/post_order_misa", MisaController.buildOrderMisa);
 module.exports = router;

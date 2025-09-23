@@ -311,9 +311,9 @@ function getSourceFromHaravanOrder(hvOrder) {
 
       // Tự map theo logic
       if (branchName.includes("Picare Việt Nam")) {
-        source = "Shopee - Picare";
+        source = "Shopee Picare";
       } else if (branchName.includes("Easydew Việt Nam")) {
-        source = "Shopee - Easydew";
+        source = "Shopee Easydew";
       }
     }
   } else if (hvOrder.source === "tiktokshop") {

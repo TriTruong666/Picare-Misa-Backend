@@ -1,61 +1,66 @@
+const MisaConfig = require("../models/misa_config.model");
 const MisaCustomer = require("../models/misa_customer.model");
 const MisaProduct = require("../models/misa_product.model");
 const MisaStock = require("../models/misa_stock.model");
 const {
   connectAmisMisa,
   postMisaDataService,
+  postSaleDocumentMisaService,
 } = require("../services/misa.service");
 
 class MisaController {
   static async connectToMisa(req, res) {
     try {
-      const data = await connectAmisMisa();
-      console.log("Đã khởi tạo thành công kết nối tới Misa Amis");
+      const result = await initialMisaConnection();
 
-      res.json(data);
+      res.json(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   }
   static async syncMisa(req, res) {
     try {
-      const { access_token } = req.body;
       const type = Number(req.query.type);
 
-      if (!access_token) {
-        return res.status(200).json({
-          message: "Thiếu Access Token vui lòng kết nối với AMIS trước",
+      if (type > 3 || type < 1) {
+        return res.status(400).json({
+          message:
+            "Vui lòng truyền đúng params type (1=Customer, 2=Product, 3=Stock)",
         });
       }
-      if (type > 3) {
-        return res.status(200).json({
-          message: "Vui lòng truyền đúng params",
+
+      // ✅ lấy token từ DB
+      const config = await MisaConfig.findByPk(1);
+      if (!config || !config.accessToken) {
+        return res.status(400).json({
+          message: "Thiếu Access Token, vui lòng kết nối AMIS trước",
         });
       }
-      const result = await syncDataMisa(access_token, type);
+
+      const result = await syncDataMisa(config.accessToken, type);
       console.log("Đồng bộ dữ liệu MISA thành công");
       res.json(result);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
   }
+
   static async syncAllMisa(req, res) {
     try {
-      const { access_token } = req.body;
-
-      if (!access_token) {
-        return res.status(200).json({
-          message: "Thiếu Access Token vui lòng kết nối với AMIS trước",
+      // ✅ lấy token từ DB
+      const config = await MisaConfig.findByPk(1);
+      if (!config || !config.accessToken) {
+        return res.status(400).json({
+          message: "Thiếu Access Token, vui lòng kết nối AMIS trước",
         });
       }
 
       console.log("=== BẮT ĐẦU SYNC TẤT CẢ DỮ LIỆU MISA ===");
 
-      // Sync đồng thời 3 loại
       const [cusResult, productResult, stockResult] = await Promise.all([
-        syncDataMisa(access_token, 1),
-        syncDataMisa(access_token, 2),
-        syncDataMisa(access_token, 3),
+        syncDataMisa(config.accessToken, 1),
+        syncDataMisa(config.accessToken, 2),
+        syncDataMisa(config.accessToken, 3),
       ]);
 
       console.log("=== KẾT THÚC SYNC MISA ===");
@@ -74,6 +79,85 @@ class MisaController {
       res.status(500).json({ error: err.message });
     }
   }
+  static async buildOrderMisa(req, res) {
+    try {
+      const { orderId } = req.body;
+
+      if (!orderId) {
+        return res.status(400).json({ error: "Thiếu orderId" });
+      }
+
+      const config = await MisaConfig.findByPk(1);
+      if (!config || !config.accessToken) {
+        return res.status(400).json({
+          message: "Thiếu Access Token, vui lòng kết nối AMIS trước",
+        });
+      }
+
+      const result = await postSaleDocumentMisaService(config.accessToken, {
+        orderId,
+      });
+
+      res.json({
+        message: "Đẩy đơn hàng sang MISA thành công",
+        data: result,
+      });
+    } catch (err) {
+      console.error("❌ buildOrderMisa Error:", err);
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async getMisaAccount(req, res) {
+    try {
+      const accounts = await MisaCustomer.findAll();
+      res.json(accounts);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async getMisaStock(req, res) {
+    try {
+      const stocks = await MisaStock.findAll();
+      res.json(stocks);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+
+  static async getMisaConfig(req, res) {
+    try {
+      const config = await MisaConfig.findOne({
+        where: { id: 1 },
+        attributes: {
+          exclude: ["id"]
+        }
+      });
+
+      res.json(config);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+}
+
+async function initialMisaConnection() {
+  const data = await connectAmisMisa();
+  console.log("Đã khởi tạo thành công kết nối tới Misa Amis");
+
+  const accessToken = data?.access_token || data?.AccessToken;
+
+  if (!accessToken) {
+    throw new Error("Không lấy được accessToken từ MISA");
+  }
+
+  await MisaConfig.upsert({
+    id: 1,
+    accessToken,
+  });
+
+  return { message: "Kết nối thành công tới Misa Amis" };
 }
 
 async function syncDataMisa(access_token, type) {
@@ -133,4 +217,4 @@ async function syncDataMisa(access_token, type) {
   };
 }
 
-module.exports = { MisaController };
+module.exports = { MisaController, initialMisaConnection, syncDataMisa };
