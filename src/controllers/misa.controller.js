@@ -221,7 +221,6 @@ async function syncDataMisa(access_token, type) {
 
   return {
     message: `Đồng bộ ${data.length} bản ghi thành công`,
-    success: true,
     total: data.length,
   };
 }

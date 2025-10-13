@@ -64,17 +64,17 @@ class OrderController {
               `CASE WHEN cancelledStatus = 'cancelled' THEN 1 ELSE 0 END`
             ),
             "ASC",
-          ], // cancelled xuống cuối
-          ["saleDate", "DESC"], // trong mỗi nhóm sort theo ngày
+          ],
+          ["saleDate", "DESC"],
         ],
         attributes: { exclude: ["id"] },
       });
 
       res.json({
-        count, // số đơn theo status filter
+        count,
         page: Number(page),
         totalPages: Math.ceil(count / Number(limit)),
-        orders: rows, // danh sách đơn đã filter
+        orders: rows,
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
