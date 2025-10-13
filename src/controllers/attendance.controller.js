@@ -1,6 +1,8 @@
 const AttendanceServer = require("../models/attendance_server.model");
 const AttendanceUser = require("../models/attendance_user.model");
-const { getAttendanceLogs } = require("../services/hik.service");
+const { google } = require("googleapis");
+const path = require("path");
+const { getAllAttendanceLogs } = require("../services/hik.service");
 
 class AttendanceController {
   static async createAttendanceServer(req, res) {
@@ -27,7 +29,7 @@ class AttendanceController {
 
   static async getAttendanceEmployeeDataByServer(req, res) {
     try {
-      const { serverId } = req.query;
+      const { serverId, page = 1, limit = 20 } = req.query;
       if (!serverId) {
         return res.json({
           message: "Vui lòng chọn máy chủ để lấy dữ liệu",
@@ -40,6 +42,13 @@ class AttendanceController {
             model: AttendanceUser,
             as: "attendance_data",
             attributes: ["empId", "empName", "checkinTime"],
+            separate: true,
+            order: [["checkinTime", "DESC"]],
+            include: {
+              model: AttendanceServer,
+              as: "server",
+              attributes: ["serverName"],
+            },
           },
         ],
       });
@@ -49,9 +58,20 @@ class AttendanceController {
         });
       }
 
+      const pageInt = parseInt(page, 10);
+      const limitInt = parseInt(limit, 10);
+
+      const startIndex = (pageInt - 1) * limitInt;
+      const endIndex = pageInt * limitInt;
+
+      const paginatedData = server.attendance_data.slice(startIndex, endIndex);
+
       res.json({
         serverName: server.serverName,
-        attendance_data: server.attendance_data,
+        page: pageInt,
+        count: server.attendance_data.length,
+        totalPage: Math.ceil(server.attendance_data.length / limitInt),
+        attendance_data: paginatedData,
       });
     } catch (err) {
       res.status(500).json({ error: err.message });
@@ -106,6 +126,18 @@ class AttendanceController {
       res.status(500).json({ error: err.message });
     }
   }
+  static async syncGoogleSheet(req, res) {
+    try {
+      const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
+      await syncAttendanceToSheet(SPREADSHEET_ID);
+
+      res.json({
+        message: "Đã đồng bộ lên Google Sheets",
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
 }
 
 async function syncAttendanceEmployee(serverId) {
@@ -120,25 +152,34 @@ async function syncAttendanceEmployee(serverId) {
   const requestUsername = server.username;
   const requestPassword = server.password;
 
-  const data = await getAttendanceLogs(
+  const data = await getAllAttendanceLogs(
     requestUsername,
     requestPassword,
     requestUrl
   );
-  const attendance_users = data?.InfoList || [];
 
-  for (const user of attendance_users) {
+  for (const user of data) {
+    const exists = await AttendanceUser.findOne({
+      where: {
+        empId: user.employeeNoString,
+        checkinTime: user.time,
+        serverId: server.serverId,
+      },
+    });
+
+    if (exists) {
+      continue;
+    }
+
     try {
-      await AttendanceUser.upsert({
+      await AttendanceUser.create({
         empId: user.employeeNoString,
         empName: user.name,
         checkinTime: user.time,
         serverId: server.serverId,
       });
-      console.log(`Đã lưu log của ${user.name}`);
     } catch (err) {
-      console.log("❌ Validation failed for", user.employeeNoString);
-      console.log(err.errors?.map((e) => `${e.path}: ${e.message}`));
+      console.log("❌ Validation failed for", user.name);
     }
   }
 
@@ -170,8 +211,64 @@ async function syncAttendanceEmployeeAll() {
   return { message: "Đã đồng bộ tất cả dữ liệu chấm công thành công", results };
 }
 
+const auth = new google.auth.GoogleAuth({
+  keyFilename: path.join(__dirname, "../../account-service.json"),
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+});
+
+const sheets = google.sheets({ version: "v4", auth });
+
+async function syncAttendanceToSheet() {
+  try {
+    const spreadsheetId = process.env.SPREADSHEET_ID;
+
+    const sheetName = "Chấm công Trung Hạnh";
+    const attendanceData = await AttendanceUser.findAll({
+      order: [["checkinTime", "DESC"]],
+      include: {
+        model: AttendanceServer,
+        as: "server",
+        attributes: ["serverName"],
+      },
+    });
+    if (!attendanceData || attendanceData.length === 0) {
+      console.log("No data to sync.");
+      return;
+    }
+
+    // Chuyển dữ liệu thành mảng 2 chiều để Google Sheets nhận
+    const values = attendanceData.map((item) => [
+      item.empId,
+      item.empName,
+      item.checkinTime,
+      item.server.serverName,
+    ]);
+
+    values.unshift(["Mã nhân viên", "Tên nhân viên", "Thời gian Check-In"]);
+
+    // Ghi dữ liệu vào Sheet, ghi đè toàn bộ nội dung
+    const res = await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values,
+      },
+    });
+
+    console.log(
+      `✅ Successfully synced ${attendanceData.length} records to sheet "${sheetName}"`
+    );
+    return res.data;
+  } catch (err) {
+    console.error("❌ Error syncing to Google Sheet:", err.message || err);
+    throw err;
+  }
+}
+
 module.exports = {
   AttendanceController,
   syncAttendanceEmployee,
   syncAttendanceEmployeeAll,
+  syncAttendanceToSheet,
 };

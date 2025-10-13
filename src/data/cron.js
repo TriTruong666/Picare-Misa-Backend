@@ -2,6 +2,10 @@ const cron = require("node-cron");
 const { sendSse } = require("../config/sse");
 const { runSyncHaravanOrders } = require("../controllers/order.controller");
 const {
+  syncAttendanceToSheet,
+  syncAttendanceEmployeeAll,
+} = require("../controllers/attendance.controller");
+const {
   initialMisaConnection,
   syncDataMisa,
 } = require("../controllers/misa.controller");
@@ -73,3 +77,18 @@ cron.schedule("*/30 * * * * *", () => {
     message: "Server Online",
   });
 });
+
+async function cronSyncAttendanceGoogleSheet() {
+  try {
+    // 1️⃣ Đồng bộ tất cả server
+    const result = await syncAttendanceEmployeeAll();
+    console.log("🔹 Attendance sync result:", result);
+    await syncAttendanceToSheet();
+
+    console.log("✅ Cron job finished successfully.");
+  } catch (err) {
+    console.error("❌ Cron job error:", err.message || err);
+  }
+}
+
+cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());

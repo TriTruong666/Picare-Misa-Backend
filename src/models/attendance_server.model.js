@@ -15,6 +15,7 @@ const AttendanceServer = sequelize.define(
     serverName: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     username: {
       type: DataTypes.STRING,

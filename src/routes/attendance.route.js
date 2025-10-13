@@ -12,5 +12,6 @@ router.get(
 );
 router.get("/server", AttendanceController.getAllAttendanceServer);
 router.post("/sync", AttendanceController.syncAttendanceData);
+router.post("/sync-google-sheet", AttendanceController.syncGoogleSheet);
 router.post("/server", AttendanceController.createAttendanceServer);
 module.exports = router;

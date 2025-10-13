@@ -43,12 +43,10 @@ async function digestPost(path, body, username, password) {
   return res2.data;
 }
 
-async function getAttendanceLogs(username, password, url) {
+async function getAllAttendanceLogs(username, password, url) {
   try {
     const now = new Date();
-
     const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-
     const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
     function toISOStringWithTZ(date) {
@@ -64,28 +62,78 @@ async function getAttendanceLogs(username, password, url) {
 
     const startTime = toISOStringWithTZ(start);
     const endTime = toISOStringWithTZ(end);
+    const maxResults = 30; // thử 30 hoặc 1000, tùy model hỗ trợ
+    let allLogs = [];
 
-    const data = await digestPost(
+    const firstResponse = await digestPost(
       `${url}/ISAPI/AccessControl/AcsEvent?format=json`,
       {
         AcsEventCond: {
-          searchID: "search_20251009",
+          searchID: `search_${Date.now()}`,
           searchResultPosition: 0,
-          maxResults: 1000,
+          maxResults: maxResults,
           major: 0,
           minor: 75,
-          startTime: startTime,
-          endTime: endTime,
+          startTime,
+          endTime,
         },
       },
       username,
       password
     );
 
-    return data.AcsEvent;
+    const firstLogs = firstResponse?.AcsEvent?.InfoList || [];
+    const totalMatches = firstResponse?.AcsEvent?.totalMatches || 0;
+    const totalPages = Math.ceil(totalMatches / maxResults);
+
+    console.log(`Total matches: ${totalMatches}`);
+    console.log(`Expected total pages: ${totalPages}`);
+
+    allLogs = allLogs.concat(firstLogs);
+    console.log(`Fetched page 1/${totalPages}: ${firstLogs.length} logs`);
+
+    // 🔹 Lặp qua các trang còn lại
+    for (let page = 2; page <= totalPages; page++) {
+      const offset = (page - 1) * maxResults;
+      console.log(`Fetching page ${page}/${totalPages} (offset ${offset})...`);
+
+      const data = await digestPost(
+        `${url}/ISAPI/AccessControl/AcsEvent?format=json`,
+        {
+          AcsEventCond: {
+            searchID: `search_${Date.now()}`,
+            searchResultPosition: offset,
+            maxResults: maxResults,
+            major: 0,
+            minor: 75,
+            startTime,
+            endTime,
+          },
+        },
+        username,
+        password
+      );
+
+      const logs = data?.AcsEvent?.InfoList || [];
+      console.log(
+        `Fetched ${logs.length} logs from page ${page}/${totalPages} (offset ${offset})`
+      );
+
+      allLogs = allLogs.concat(logs);
+
+      // Nếu trả ít hơn maxResults thì dừng luôn (nhiều thiết bị không đủ log)
+      if (logs.length < maxResults) {
+        console.log("Reached last available page early.");
+        break;
+      }
+    }
+
+    console.log(`✅ Total logs fetched: ${allLogs.length}`);
+    return allLogs;
   } catch (err) {
-    console.log(err);
+    console.error("❌ Error fetching attendance logs:", err);
+    throw err;
   }
 }
 
-module.exports = { getAttendanceLogs };
+module.exports = { getAllAttendanceLogs };
