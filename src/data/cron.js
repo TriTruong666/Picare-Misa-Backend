@@ -1,4 +1,5 @@
 const cron = require("node-cron");
+const { Op } = require("sequelize");
 const { sendSse } = require("../config/sse");
 const { runSyncHaravanOrders } = require("../controllers/order.controller");
 const {
@@ -10,6 +11,8 @@ const {
   syncDataMisa,
 } = require("../controllers/misa.controller");
 const MisaConfig = require("../models/misa_config.model");
+const Order = require("../models/order.model");
+const { postSaleDocumentMisaService } = require("../services/misa.service");
 
 async function runMisaCron() {
   try {
@@ -92,3 +95,48 @@ async function cronSyncAttendanceGoogleSheet() {
 }
 
 cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function buildDocmentMisaStockOrder() {
+  try {
+    const stockOrders = await Order.findAll({
+      where: {
+        status: "pending",
+        carrierStatus: {
+          [Op.or]: ["delivered", "delivering"],
+        },
+      },
+      order: [["saleDate", "ASC"]],
+    });
+
+    const config = await MisaConfig.findByPk(1);
+    if (!config || !config.accessToken) {
+      await initialMisaConnection();
+    }
+
+    if (stockOrders.length === 0) {
+      console.log("Xin chứng từ tự động dùng lại, hết đơn để xử lý");
+      return;
+    }
+
+    for (const order of stockOrders) {
+      try {
+        await postSaleDocumentMisaService(config.accessToken, {
+          orderId: order.orderId,
+        });
+        await order.update({ status: "completed" });
+        console.log(`Đã xin chứng từ đơn ${order.orderId}`);
+      } catch (error) {
+        console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
+      }
+      await delay(30000);
+    }
+  } catch (error) {
+    console.error(`Lỗi tự động Misa:`, error);
+  }
+}
+
+cron.schedule("0 * * * *", async () => buildDocmentMisaStockOrder());

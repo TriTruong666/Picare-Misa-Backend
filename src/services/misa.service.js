@@ -147,7 +147,8 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           amount_oc: priceBeforeTax * item.qty,
 
           discount_rate: null,
-          discount_amount: 0,
+          discount_amount: order.totalDiscountPrice || 0,
+          discount_amount_oc: order.totalDiscountPrice || 0,
 
           main_quantity: item.qty,
           main_convert_rate: null,
@@ -214,7 +215,9 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
       due_day: 15,
       is_calculated_cost: false,
       exchange_rate: 1,
-      journal_memo: `(API) Đơn hàng ${customer.account_object_name} - Mã đơn hàng: ${order.orderId}`,
+      journal_memo: `${order.orderId} - ${customer.account_object_name} ${
+        order.totalDiscountPrice > 0 ? "- CoCK" : ""
+      } `,
       shipping_address: customer.address,
       currency_id: "VND",
       discount_type: 1,
