@@ -108,6 +108,7 @@ async function buildDocmentMisaStockOrder() {
         carrierStatus: {
           [Op.or]: ["delivered", "delivering"],
         },
+        cancelledStatus: "uncancelled",
       },
       order: [["saleDate", "ASC"]],
     });
