@@ -87,7 +87,6 @@ async function cronSyncAttendanceGoogleSheet() {
   try {
     await syncAttendanceEmployeeAll(75);
     await syncAttendanceEmployeeAll(104);
-    console.log("🔹 Attendance sync result:", result);
 
     console.log("Đồng bộ chấm công tự động thành công");
   } catch (err) {
