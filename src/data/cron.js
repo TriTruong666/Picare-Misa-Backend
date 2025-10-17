@@ -1,6 +1,7 @@
 const cron = require("node-cron");
 const { Op } = require("sequelize");
 const { sendSse } = require("../config/sse");
+const dayjs = require("dayjs");
 const { runSyncHaravanOrders } = require("../controllers/order.controller");
 const {
   syncAttendanceToSheet,
@@ -102,13 +103,20 @@ function delay(ms) {
 
 async function buildDocmentMisaStockOrder() {
   try {
+    const startOfDay = dayjs().startOf("day").toDate();
+    const endOfDay = dayjs().endOf("day").toDate();
     const stockOrders = await Order.findAll({
       where: {
-        status: "pending",
+        status: {
+          [Op.or]: ["pending", "stock"],
+        },
         carrierStatus: {
           [Op.or]: ["delivered", "delivering"],
         },
         cancelledStatus: "uncancelled",
+        saleDate: {
+          [Op.between]: [startOfDay, endOfDay],
+        },
       },
       order: [["saleDate", "ASC"]],
     });
