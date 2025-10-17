@@ -96,78 +96,78 @@ async function cronSyncAttendanceGoogleSheet() {
   }
 }
 
-cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
+// cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// async function buildDocmentMisaStockOrder() {
-//   try {
-//     const startOfDay = dayjs().startOf("day").toDate();
-//     const endOfDay = dayjs().endOf("day").toDate();
-//     const stockOrders = await Order.findAll({
-//       where: {
-//         status: {
-//           [Op.or]: ["pending", "stock"],
-//         },
-//         carrierStatus: {
-//           [Op.or]: ["delivered", "delivering"],
-//         },
-//         cancelledStatus: "uncancelled",
-//         saleDate: {
-//           [Op.between]: [startOfDay, endOfDay],
-//         },
-//       },
-//       order: [["saleDate", "ASC"]],
-//     });
+async function buildDocmentMisaStockOrder() {
+  try {
+    const startOfDay = dayjs().startOf("day").toDate();
+    const endOfDay = dayjs().endOf("day").toDate();
+    const stockOrders = await Order.findAll({
+      where: {
+        status: {
+          [Op.or]: ["pending", "stock"],
+        },
+        carrierStatus: {
+          [Op.or]: ["delivered", "delivering"],
+        },
+        cancelledStatus: "uncancelled",
+        saleDate: {
+          [Op.between]: [startOfDay, endOfDay],
+        },
+      },
+      order: [["saleDate", "ASC"]],
+    });
 
-//     const config = await MisaConfig.findByPk(1);
-//     if (!config || !config.accessToken) {
-//       await initialMisaConnection();
-//     }
+    const config = await MisaConfig.findByPk(1);
+    if (!config || !config.accessToken) {
+      await initialMisaConnection();
+    }
 
-//     if (stockOrders.length === 0) {
-//       console.log("Xin chứng từ tự động dùng lại, hết đơn để xử lý");
-//       return;
-//     }
+    if (stockOrders.length === 0) {
+      console.log("Xin chứng từ tự động dùng lại, hết đơn để xử lý");
+      return;
+    }
 
-//     for (const order of stockOrders) {
-//       try {
-//         const { refId, refDetailId } = await postSaleDocumentMisaService(
-//           config.accessToken,
-//           {
-//             orderId: order.orderId,
-//           }
-//         );
-//         await EbizMisaDone.upsert({
-//           orderId: order.orderId,
-//           haravanId: order.haravanId,
-//           saleDate: order.saleDate,
-//           financialStatus: order.financialStatus,
-//           carrierStatus: order.carrierStatus,
-//           realCarrierStatus: order.realCarrierStatus,
-//           totalPrice: order.totalPrice,
-//           totalLineItemPrice: order.totalLineItemPrice,
-//           totalDiscountPrice: order.totalDiscountPrice,
-//           cancelledStatus: order.cancelledStatus,
-//           trackingNumber: order.trackingNumber,
-//           isSPXFast: order.isSPXFast,
-//           source: order.source,
-//           note: order.note,
-//           refId,
-//           refDetailId,
-//         });
-//         await order.update({ status: "completed" });
-//         console.log(`Đã xin chứng từ đơn ${order.orderId}`);
-//       } catch (error) {
-//         console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
-//       }
-//       await delay(20000);
-//     }
-//   } catch (error) {
-//     console.error(`Lỗi tự động Misa:`, error);
-//   }
-// }
+    for (const order of stockOrders) {
+      try {
+        const { refId, refDetailId } = await postSaleDocumentMisaService(
+          config.accessToken,
+          {
+            orderId: order.orderId,
+          }
+        );
+        await EbizMisaDone.upsert({
+          orderId: order.orderId,
+          haravanId: order.haravanId,
+          saleDate: order.saleDate,
+          financialStatus: order.financialStatus,
+          carrierStatus: order.carrierStatus,
+          realCarrierStatus: order.realCarrierStatus,
+          totalPrice: order.totalPrice,
+          totalLineItemPrice: order.totalLineItemPrice,
+          totalDiscountPrice: order.totalDiscountPrice,
+          cancelledStatus: order.cancelledStatus,
+          trackingNumber: order.trackingNumber,
+          isSPXFast: order.isSPXFast,
+          source: order.source,
+          note: order.note,
+          refId,
+          refDetailId,
+        });
+        await order.update({ status: "completed" });
+        console.log(`Đã xin chứng từ đơn ${order.orderId}`);
+      } catch (error) {
+        console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
+      }
+      await delay(20000);
+    }
+  } catch (error) {
+    console.error(`Lỗi tự động Misa:`, error);
+  }
+}
 
-// cron.schedule("0 * * * *", async () => buildDocmentMisaStockOrder());
+cron.schedule("0 * * * *", async () => buildDocmentMisaStockOrder());
