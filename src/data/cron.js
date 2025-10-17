@@ -85,18 +85,17 @@ cron.schedule("*/30 * * * * *", () => {
 
 async function cronSyncAttendanceGoogleSheet() {
   try {
-    // 1️⃣ Đồng bộ tất cả server
-    const result = await syncAttendanceEmployeeAll();
+    await syncAttendanceEmployeeAll(75);
+    await syncAttendanceEmployeeAll(104);
     console.log("🔹 Attendance sync result:", result);
-    await syncAttendanceToSheet();
 
-    console.log("✅ Cron job finished successfully.");
+    console.log("Đồng bộ chấm công tự động thành công");
   } catch (err) {
     console.error("❌ Cron job error:", err.message || err);
   }
 }
 
-// cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
+cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
