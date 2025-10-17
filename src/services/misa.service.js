@@ -103,7 +103,8 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
     if (!stock || !customer)
       throw new Error("Thiếu thông tin stock hoặc customer");
 
-    const refId = order.id || crypto.randomUUID();
+    const refId = crypto.randomUUID();
+    const refDetailId = crypto.randomUUID();
 
     const detail = await Promise.all(
       order.line_items.map(async (item, index) => {
@@ -123,7 +124,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
         const vatAmount = priceAfterTax - priceBeforeTax;
 
         return {
-          ref_detail_id: crypto.randomUUID(),
+          ref_detail_id: refDetailId,
           refid: refId,
           org_refid: refId,
 
@@ -258,7 +259,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
       }
     );
 
-    return res.data;
+    return { data: res.data, refId, refDetailId };
   } catch (err) {
     console.error(" Misa Error:", err.message);
     throw err;

@@ -41,7 +41,7 @@ class AttendanceController {
           {
             model: AttendanceUser,
             as: "attendance_data",
-            attributes: ["empId", "empName", "checkinTime"],
+            attributes: ["empId", "empName", "checkinTime", "type"],
             separate: true,
             order: [["checkinTime", "DESC"]],
             include: {
@@ -80,10 +80,17 @@ class AttendanceController {
 
   static async getAttendanceEmployeeData(req, res) {
     try {
-      const { page = 1, limit = 20 } = req.query;
+      const { page = 1, limit = 20, type } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
+      const where = {};
+
+      if (type) {
+        where.type = type;
+      }
+
       const { count, rows } = await AttendanceUser.findAndCountAll({
+        where,
         limit: Number(limit),
         offset,
         order: [["checkinTime", "DESC"]],
@@ -108,7 +115,7 @@ class AttendanceController {
   }
   static async syncAttendanceData(req, res) {
     try {
-      const { serverId } = req.body;
+      const { serverId, minor } = req.body;
       const { type } = req.query;
       if (type === "single") {
         if (!serverId) {
@@ -116,10 +123,10 @@ class AttendanceController {
             message: "Vui lòng chọn máy chủ để đồng bộ",
           });
         }
-        const result = await syncAttendanceEmployee(serverId);
+        const result = await syncAttendanceEmployee(serverId, minor);
         return res.json(result);
       } else if (type === "all") {
-        const result = await syncAttendanceEmployeeAll();
+        const result = await syncAttendanceEmployeeAll(minor);
         return res.json(result);
       }
     } catch (err) {
@@ -140,7 +147,7 @@ class AttendanceController {
   }
 }
 
-async function syncAttendanceEmployee(serverId) {
+async function syncAttendanceEmployee(serverId, type) {
   const server = await AttendanceServer.findOne({
     where: { serverId: serverId },
   });
@@ -155,7 +162,8 @@ async function syncAttendanceEmployee(serverId) {
   const data = await getAllAttendanceLogs(
     requestUsername,
     requestPassword,
-    requestUrl
+    requestUrl,
+    type
   );
 
   for (const user of data) {
@@ -177,16 +185,17 @@ async function syncAttendanceEmployee(serverId) {
         empName: user.name,
         checkinTime: user.time,
         serverId: server.serverId,
+        type: type === 75 ? "face" : "fingerprint",
       });
     } catch (err) {
-      console.log("❌ Validation failed for", user.name);
+      console.log("Validation failed for", user.name);
     }
   }
 
   return { message: `Đã đồng bộ xong dữ liệu từ máy chủ ${server.serverName}` };
 }
 
-async function syncAttendanceEmployeeAll() {
+async function syncAttendanceEmployeeAll(type) {
   const servers = await AttendanceServer.findAll();
   if (servers.length === 0) {
     return { message: "Không có máy chủ nào để đồng bộ" };
@@ -195,7 +204,7 @@ async function syncAttendanceEmployeeAll() {
 
   for (const server of servers) {
     try {
-      const result = await syncAttendanceEmployee(server.serverId);
+      const result = await syncAttendanceEmployee(server.serverId, type);
       results.push({ server: server.serverName, message: result.message });
     } catch (err) {
       console.error(
@@ -241,6 +250,7 @@ async function syncAttendanceToSheet() {
       item.empId,
       item.empName,
       item.checkinTime,
+      item.type,
       item.server.serverName,
     ]);
 

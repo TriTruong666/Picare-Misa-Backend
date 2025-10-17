@@ -14,6 +14,7 @@ const {
 const MisaConfig = require("../models/misa_config.model");
 const Order = require("../models/order.model");
 const { postSaleDocumentMisaService } = require("../services/misa.service");
+const EbizMisaDone = require("../models/misa_done.model");
 
 async function runMisaCron() {
   try {
@@ -133,15 +134,36 @@ function delay(ms) {
 
 //     for (const order of stockOrders) {
 //       try {
-//         await postSaleDocumentMisaService(config.accessToken, {
+//         const { refId, refDetailId } = await postSaleDocumentMisaService(
+//           config.accessToken,
+//           {
+//             orderId: order.orderId,
+//           }
+//         );
+//         await EbizMisaDone.upsert({
 //           orderId: order.orderId,
+//           haravanId: order.haravanId,
+//           saleDate: order.saleDate,
+//           financialStatus: order.financialStatus,
+//           carrierStatus: order.carrierStatus,
+//           realCarrierStatus: order.realCarrierStatus,
+//           totalPrice: order.totalPrice,
+//           totalLineItemPrice: order.totalLineItemPrice,
+//           totalDiscountPrice: order.totalDiscountPrice,
+//           cancelledStatus: order.cancelledStatus,
+//           trackingNumber: order.trackingNumber,
+//           isSPXFast: order.isSPXFast,
+//           source: order.source,
+//           note: order.note,
+//           refId,
+//           refDetailId,
 //         });
 //         await order.update({ status: "completed" });
 //         console.log(`Đã xin chứng từ đơn ${order.orderId}`);
 //       } catch (error) {
 //         console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
 //       }
-//       await delay(30000);
+//       await delay(20000);
 //     }
 //   } catch (error) {
 //     console.error(`Lỗi tự động Misa:`, error);

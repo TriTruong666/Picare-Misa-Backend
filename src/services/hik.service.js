@@ -43,7 +43,7 @@ async function digestPost(path, body, username, password) {
   return res2.data;
 }
 
-async function getAllAttendanceLogs(username, password, url) {
+async function getAllAttendanceLogs(username, password, url, type) {
   try {
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
@@ -73,7 +73,7 @@ async function getAllAttendanceLogs(username, password, url) {
           searchResultPosition: 0,
           maxResults: maxResults,
           major: 0,
-          minor: 75,
+          minor: type,
           startTime,
           endTime,
         },

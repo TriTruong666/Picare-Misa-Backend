@@ -23,6 +23,10 @@ const AttendanceUser = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    type: {
+      type: DataTypes.ENUM("face", "fingerprint"),
+      allowNull: false,
+    },
     serverId: {
       type: DataTypes.STRING(36),
       allowNull: false,

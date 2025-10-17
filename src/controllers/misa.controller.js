@@ -1,7 +1,9 @@
 const MisaConfig = require("../models/misa_config.model");
 const MisaCustomer = require("../models/misa_customer.model");
+const EbizMisaDone = require("../models/misa_done.model");
 const MisaProduct = require("../models/misa_product.model");
 const MisaStock = require("../models/misa_stock.model");
+const Order = require("../models/order.model");
 const {
   connectAmisMisa,
   postMisaDataService,
@@ -96,23 +98,50 @@ class MisaController {
         return res.status(400).json({ error: "Thiếu orderId" });
       }
 
-      const config = await MisaConfig.findByPk(1);
-      if (!config || !config.accessToken) {
-        return res.status(400).json({
-          message: "Thiếu Access Token, vui lòng kết nối AMIS trước",
-        });
+      const order = await Order.findOne({ where: { orderId } });
+      if (!order) {
+        return res.status(404).json({ error: "Không tìm thấy đơn hàng" });
       }
 
-      const result = await postSaleDocumentMisaService(config.accessToken, {
-        orderId,
+      const config = await MisaConfig.findByPk(1);
+      if (!config || !config.accessToken) {
+        await initialMisaConnection();
+      }
+
+      const { data, refId, refDetailId } = await postSaleDocumentMisaService(
+        config.accessToken,
+        { orderId }
+      );
+
+      await EbizMisaDone.upsert({
+        orderId: order.orderId,
+        haravanId: order.haravanId,
+        saleDate: order.saleDate,
+        financialStatus: order.financialStatus,
+        carrierStatus: order.carrierStatus,
+        realCarrierStatus: order.realCarrierStatus,
+        totalPrice: order.totalPrice,
+        totalLineItemPrice: order.totalLineItemPrice,
+        totalDiscountPrice: order.totalDiscountPrice,
+        cancelledStatus: order.cancelledStatus,
+        trackingNumber: order.trackingNumber,
+        isSPXFast: order.isSPXFast,
+        source: order.source,
+        note: order.note,
+        refId,
+        refDetailId,
       });
+
+      await order.update({ status: "completed" });
 
       res.json({
         message: "Đẩy đơn hàng sang MISA thành công",
-        data: result,
+        data,
+        refId,
+        refDetailId,
       });
     } catch (err) {
-      console.error(" buildOrderMisa Error:", err);
+      console.error("buildOrderMisa Error:", err);
       res.status(500).json({ error: err.message });
     }
   }
