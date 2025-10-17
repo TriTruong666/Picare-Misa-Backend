@@ -247,51 +247,67 @@ async function runSyncHaravanOrders() {
     where: { status: { [Op.not]: null } },
     raw: true,
   });
+
   const processedOrderIds = new Set(existingOrders.map((o) => o.orderId));
+  let successCount = 0;
+  let failedCount = 0;
 
   for (const hvOrder of haravanOrders) {
     const orderId = hvOrder.order_number.toString();
 
+    // Bỏ qua nếu đã tồn tại
     if (processedOrderIds.has(orderId)) continue;
 
-    await Order.upsert({
-      orderId,
-      haravanId: hvOrder.number,
-      saleDate: hvOrder.created_at.toString(),
-      financialStatus: hvOrder.financial_status,
-      carrierStatus:
-        hvOrder.fulfillments?.[0]?.carrier_status_code || "not_deliver",
-      realCarrierStatus:
-        hvOrder.fulfillments?.[0]?.status || "not_real_deliver",
-      source: getSourceFromHaravanOrder(hvOrder),
-      isSPXFast:
-        hvOrder.fulfillments?.[0]?.tracking_company === "Siêu Tốc - 4 Giờ"
-          ? "fast"
-          : "normal",
-      cancelledStatus: hvOrder.cancelled_status,
-      totalPrice: parseFloat(hvOrder.total_price),
-      totalLineItemPrice: parseFloat(hvOrder.total_line_items_price),
-      totalDiscountPrice: parseFloat(hvOrder.total_discounts),
-      trackingNumber: hvOrder.fulfillments?.[0]?.tracking_number || null,
-      status: "pending",
-    });
+    try {
+      await Order.upsert({
+        orderId,
+        haravanId: hvOrder.number,
+        saleDate: hvOrder.created_at.toString(),
+        financialStatus: hvOrder.financial_status,
+        carrierStatus:
+          hvOrder.fulfillments?.[0]?.carrier_status_code || "not_deliver",
+        realCarrierStatus:
+          hvOrder.fulfillments?.[0]?.status || "not_real_deliver",
+        source: getSourceFromHaravanOrder(hvOrder),
+        isSPXFast:
+          hvOrder.fulfillments?.[0]?.tracking_company === "Siêu Tốc - 4 Giờ"
+            ? "fast"
+            : "normal",
+        cancelledStatus: hvOrder.cancelled_status,
+        totalPrice: parseFloat(hvOrder.total_price),
+        totalLineItemPrice: parseFloat(hvOrder.total_line_items_price),
+        totalDiscountPrice: parseFloat(hvOrder.total_discounts),
+        trackingNumber: hvOrder.fulfillments?.[0]?.tracking_number || null,
+        status: "pending",
+      });
 
-    await OrderDetail.destroy({ where: { orderId } });
+      await OrderDetail.destroy({ where: { orderId } });
+      const lineItems = hvOrder.line_items.map((item) => ({
+        orderId,
+        sku: item.sku,
+        price: parseFloat(item.price),
+        qty: item.quantity,
+        productName: item.title,
+      }));
 
-    const lineItems = hvOrder.line_items.map((item) => ({
-      orderId,
-      sku: item.sku,
-      price: parseFloat(item.price),
-      qty: item.quantity,
-      productName: item.title,
-    }));
+      if (lineItems.length > 0) {
+        await OrderDetail.bulkCreate(lineItems);
+      }
 
-    if (lineItems.length > 0) {
-      await OrderDetail.bulkCreate(lineItems);
+      console.log(`Đồng bộ đơn ${orderId} thành công`);
+      successCount++;
+    } catch (error) {
+      failedCount++;
+      console.error(`Lỗi khi xử lý đơn ${orderId}:`, error.message);
+
+      continue;
     }
   }
 
-  return { synced: haravanOrders.length };
+  console.log(
+    `✅ Hoàn tất đồng bộ: ${successCount} đơn thành công, ${failedCount} đơn lỗi.`
+  );
+  return { synced: successCount, failed: failedCount };
 }
 
 function getSourceFromHaravanOrder(hvOrder) {
