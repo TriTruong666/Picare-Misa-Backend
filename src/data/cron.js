@@ -101,51 +101,51 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function buildDocmentMisaStockOrder() {
-  try {
-    const startOfDay = dayjs().startOf("day").toDate();
-    const endOfDay = dayjs().endOf("day").toDate();
-    const stockOrders = await Order.findAll({
-      where: {
-        status: {
-          [Op.or]: ["pending", "stock"],
-        },
-        carrierStatus: {
-          [Op.or]: ["delivered", "delivering"],
-        },
-        cancelledStatus: "uncancelled",
-        saleDate: {
-          [Op.between]: [startOfDay, endOfDay],
-        },
-      },
-      order: [["saleDate", "ASC"]],
-    });
+// async function buildDocmentMisaStockOrder() {
+//   try {
+//     const startOfDay = dayjs().startOf("day").toDate();
+//     const endOfDay = dayjs().endOf("day").toDate();
+//     const stockOrders = await Order.findAll({
+//       where: {
+//         status: {
+//           [Op.or]: ["pending", "stock"],
+//         },
+//         carrierStatus: {
+//           [Op.or]: ["delivered", "delivering"],
+//         },
+//         cancelledStatus: "uncancelled",
+//         saleDate: {
+//           [Op.between]: [startOfDay, endOfDay],
+//         },
+//       },
+//       order: [["saleDate", "ASC"]],
+//     });
 
-    const config = await MisaConfig.findByPk(1);
-    if (!config || !config.accessToken) {
-      await initialMisaConnection();
-    }
+//     const config = await MisaConfig.findByPk(1);
+//     if (!config || !config.accessToken) {
+//       await initialMisaConnection();
+//     }
 
-    if (stockOrders.length === 0) {
-      console.log("Xin chứng từ tự động dùng lại, hết đơn để xử lý");
-      return;
-    }
+//     if (stockOrders.length === 0) {
+//       console.log("Xin chứng từ tự động dùng lại, hết đơn để xử lý");
+//       return;
+//     }
 
-    for (const order of stockOrders) {
-      try {
-        await postSaleDocumentMisaService(config.accessToken, {
-          orderId: order.orderId,
-        });
-        await order.update({ status: "completed" });
-        console.log(`Đã xin chứng từ đơn ${order.orderId}`);
-      } catch (error) {
-        console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
-      }
-      await delay(30000);
-    }
-  } catch (error) {
-    console.error(`Lỗi tự động Misa:`, error);
-  }
-}
+//     for (const order of stockOrders) {
+//       try {
+//         await postSaleDocumentMisaService(config.accessToken, {
+//           orderId: order.orderId,
+//         });
+//         await order.update({ status: "completed" });
+//         console.log(`Đã xin chứng từ đơn ${order.orderId}`);
+//       } catch (error) {
+//         console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
+//       }
+//       await delay(30000);
+//     }
+//   } catch (error) {
+//     console.error(`Lỗi tự động Misa:`, error);
+//   }
+// }
 
-cron.schedule("0 * * * *", async () => buildDocmentMisaStockOrder());
+// cron.schedule("0 * * * *", async () => buildDocmentMisaStockOrder());
