@@ -4,7 +4,6 @@ const { sendSse } = require("../config/sse");
 const dayjs = require("dayjs");
 const { runSyncHaravanOrders } = require("../controllers/order.controller");
 const {
-  syncAttendanceToSheet,
   syncAttendanceEmployeeAll,
 } = require("../controllers/attendance.controller");
 const {
@@ -15,8 +14,51 @@ const MisaConfig = require("../models/misa_config.model");
 const Order = require("../models/order.model");
 const { postSaleDocumentMisaService } = require("../services/misa.service");
 const EbizMisaDone = require("../models/misa_done.model");
+const OrderDetail = require("../models/order_detail.model");
 
-async function runMisaCron() {
+cron.schedule("0,30 * * * *", async () => cronSyncHaravanOrder());
+cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
+cron.schedule("0 * * * *", async () => buildDocmentMisaStockOrder());
+cron.schedule("*/30 * * * * *", () => {
+  sendSse({
+    status: "health",
+    message: "Server Online",
+  });
+});
+cron.schedule("0,20,40 * * * *", async () => misaCronInitData());
+cron.schedule("29,59 * * * *", () => {
+  sendSse({
+    status: "warning",
+    message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
+    type: "notification",
+  });
+  console.log("Prepare Sync Haravan...");
+});
+cron.schedule("0 0 * * *", async () => cronDeleteOrder());
+
+async function cronDeleteOrder() {
+  try {
+    const startDate = dayjs().subtract(7, "day").startOf("day").toDate();
+    const endDate = dayjs().subtract(4, "day").endOf("day").toDate();
+
+    const orders = await Order.findAll({
+      where: {
+        saleDate: {
+          [Op.between]: [startDate, endDate],
+        },
+      },
+      include: { model: OrderDetail, as: "line_items" },
+    });
+    for (const order of orders) {
+      await order.destroy();
+      console.log(`Đã tự động xoá đơn ${order.orderId} (${order.saleDate})`);
+    }
+  } catch (error) {
+    console.error("Lỗi khi xoá đơn:", error);
+  }
+}
+
+async function misaCronInitData() {
   try {
     await initialMisaConnection();
     console.log("Đã kết nối MISA");
@@ -27,7 +69,6 @@ async function runMisaCron() {
     }
     const accessToken = config.accessToken;
 
-    // B3: Sync lần lượt 3 loại dữ liệu
     const [cus, product, stock] = await Promise.all([
       syncDataMisa(accessToken, 1),
       syncDataMisa(accessToken, 2),
@@ -43,19 +84,8 @@ async function runMisaCron() {
     console.error(" Cron MISA Error:", err.message);
   }
 }
-cron.schedule("0,20,40 * * * *", runMisaCron);
 
-cron.schedule("29,59 * * * *", () => {
-  sendSse({
-    status: "warning",
-    message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
-    type: "notification",
-  });
-  console.log("Prepare Sync Haravan...");
-});
-
-// Job đồng bộ chính, chạy mỗi 30 phút
-cron.schedule("0,30 * * * *", async () => {
+async function cronSyncHaravanOrder() {
   try {
     sendSse({
       status: "running",
@@ -74,14 +104,7 @@ cron.schedule("0,30 * * * *", async () => {
   } catch (err) {
     sendSse({ status: "error", message: ` Lỗi: ${err.message}` });
   }
-});
-
-cron.schedule("*/30 * * * * *", () => {
-  sendSse({
-    status: "health",
-    message: "Server Online",
-  });
-});
+}
 
 async function cronSyncAttendanceGoogleSheet() {
   try {
@@ -94,8 +117,6 @@ async function cronSyncAttendanceGoogleSheet() {
   }
 }
 
-cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
-
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -103,11 +124,12 @@ function delay(ms) {
 async function buildDocmentMisaStockOrder() {
   try {
     const startOfDay = dayjs().startOf("day").toDate();
-    const endOfDay = dayjs().endOf("day").toDate();
+    const endOfDay = dayjs().subtract(3, "day").endOf("day").toDate();
+
     const stockOrders = await Order.findAll({
       where: {
         status: {
-          [Op.or]: ["pending", "stock"],
+          [Op.or]: ["pending", "stock", "invoice"],
         },
         carrierStatus: {
           [Op.or]: ["delivered", "delivering"],
@@ -161,11 +183,9 @@ async function buildDocmentMisaStockOrder() {
       } catch (error) {
         console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
       }
-      await delay(20000);
+      await delay(5000);
     }
   } catch (error) {
     console.error(`Lỗi tự động Misa:`, error);
   }
 }
-
-cron.schedule("0 * * * *", async () => buildDocmentMisaStockOrder());

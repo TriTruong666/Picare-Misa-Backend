@@ -41,12 +41,14 @@ Order.hasMany(OrderDetail, {
   foreignKey: "orderId",
   sourceKey: "orderId",
   as: "line_items",
+  onDelete: "CASCADE",
 });
 
 OrderDetail.belongsTo(Order, {
   foreignKey: "orderId",
   targetKey: "orderId",
   as: "order",
+  onDelete: "CASCADE",
 });
 
 module.exports = OrderDetail;
