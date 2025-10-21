@@ -86,17 +86,11 @@ async function getAllAttendanceLogs(username, password, url, type) {
     const totalMatches = firstResponse?.AcsEvent?.totalMatches || 0;
     const totalPages = Math.ceil(totalMatches / maxResults);
 
-    console.log(`Total matches: ${totalMatches}`);
-    console.log(`Expected total pages: ${totalPages}`);
-
     allLogs = allLogs.concat(firstLogs);
-    console.log(`Fetched page 1/${totalPages}: ${firstLogs.length} logs`);
 
     // 🔹 Lặp qua các trang còn lại
     for (let page = 2; page <= totalPages; page++) {
       const offset = (page - 1) * maxResults;
-      console.log(`Fetching page ${page}/${totalPages} (offset ${offset})...`);
-
       const data = await digestPost(
         `${url}/ISAPI/AccessControl/AcsEvent?format=json`,
         {
@@ -115,20 +109,15 @@ async function getAllAttendanceLogs(username, password, url, type) {
       );
 
       const logs = data?.AcsEvent?.InfoList || [];
-      console.log(
-        `Fetched ${logs.length} logs from page ${page}/${totalPages} (offset ${offset})`
-      );
-
       allLogs = allLogs.concat(logs);
 
       // Nếu trả ít hơn maxResults thì dừng luôn (nhiều thiết bị không đủ log)
       if (logs.length < maxResults) {
-        console.log("Reached last available page early.");
         break;
       }
     }
 
-    console.log(`✅ Total logs fetched: ${allLogs.length}`);
+    console.log(`Tổng log chấm công: ${allLogs.length}`);
     return allLogs;
   } catch (err) {
     console.error("❌ Error fetching attendance logs:", err);
