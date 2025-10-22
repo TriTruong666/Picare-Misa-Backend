@@ -18,7 +18,7 @@ const OrderDetail = require("../models/order_detail.model");
 
 cron.schedule("0,30 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
-cron.schedule("0 * * * *", async () => buildDocmentMisaStockOrder());
+cron.schedule("0,30 * * * *", async () => buildDocmentMisaStockOrder());
 cron.schedule("*/30 * * * * *", () => {
   sendSse({
     status: "health",
