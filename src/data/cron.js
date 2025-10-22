@@ -251,7 +251,7 @@ async function buildDocmentMisaStockOrder() {
         failedCount++;
         console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
       }
-      await delay(5000);
+      await delay(500);
     }
     console.log(
       `Hoàn tất lập chứng từ: ${successCount} đơn thành công, ${failedCount} đơn lỗi.`
