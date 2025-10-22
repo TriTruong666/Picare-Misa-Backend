@@ -123,8 +123,8 @@ function delay(ms) {
 
 async function buildDocmentMisaStockOrder() {
   try {
-    const startOfDay = dayjs().startOf("day").toDate();
-    const endOfDay = dayjs().subtract(3, "day").endOf("day").toDate();
+    const startOfDay = dayjs().subtract(3, "day").startOf("day").toDate();
+    const endOfDay = dayjs().endOf("day").toDate();
 
     const stockOrders = await Order.findAll({
       where: {
