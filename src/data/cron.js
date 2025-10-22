@@ -18,9 +18,11 @@ const OrderDetail = require("../models/order_detail.model");
 const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
 
-cron.schedule("0,20,40 * * * *", async () => cronSyncHaravanOrder());
-cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
-cron.schedule("0,30 * * * *", async () => buildDocmentMisaStockOrder());
+cron.schedule("0,5,10,15,20,30,40,50 * * * *", async () =>
+  cronSyncHaravanOrder()
+);
+cron.schedule("*/5 * * * *", async () => cronSyncAttendanceGoogleSheet());
+cron.schedule("0,7,14,21,28 * * * *", async () => buildDocmentMisaStockOrder());
 cron.schedule("28,58 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
   sendSse({
