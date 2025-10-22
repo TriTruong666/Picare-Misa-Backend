@@ -16,6 +16,7 @@ const { postSaleDocumentMisaService } = require("../services/misa.service");
 const EbizMisaDone = require("../models/misa_done.model");
 const OrderDetail = require("../models/order_detail.model");
 const EbizMisaCancel = require("../models/misa_cancel.model");
+const ActivityLog = require("../models/activity_log.model");
 
 cron.schedule("0,20,40 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
@@ -245,11 +246,21 @@ async function buildDocmentMisaStockOrder() {
           refDetailId,
         });
         await order.update({ status: "completed" });
+        await ActivityLog.create({
+          name: "System",
+          type: "accounting",
+          note: `Đã xin chứng từ đơn ${order.orderId}`,
+        });
         successCount++;
         console.log(`Đã xin chứng từ đơn ${order.orderId}`);
       } catch (error) {
         failedCount++;
-        console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
+        await ActivityLog.create({
+          name: "System",
+          type: "accounting",
+          note: `Lỗi xin chứng từ đơn ${order.orderId}`,
+        });
+        console.error(`Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
       }
       await delay(500);
     }

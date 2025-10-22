@@ -261,12 +261,38 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
     return { data: res.data, refId, refDetailId };
   } catch (err) {
-    // console.error(" Misa Error:", err.message);
     throw err;
   }
 }
+
+async function deleteMisaDataService() {
+  try {
+    const body = {
+      voucher: [
+        {
+          voucher_type: 20,
+          org_refid: "db7abc10-f07f-4349-bb3c-41783a519071",
+        },
+      ],
+      app_id: process.env.MISA_APP_ID,
+      org_company_code: "k6aguh1l",
+    };
+    const res = await axios.delete(
+      "https://actapp.misa.vn/apir/sync/actopen/delete",
+      body,
+      {
+        headers: { "X-MISA-AccessToken": accessToken },
+      }
+    );
+    return res.data;
+  } catch (err) {
+    throw err;
+  }
+}
+
 module.exports = {
   connectAmisMisa,
   postMisaDataService,
   postSaleDocumentMisaService,
+  deleteMisaDataService,
 };
