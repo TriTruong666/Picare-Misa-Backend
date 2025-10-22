@@ -246,11 +246,6 @@ async function buildDocmentMisaStockOrder() {
           refDetailId,
         });
         await order.update({ status: "completed" });
-        await ActivityLog.create({
-          name: "System",
-          type: "accounting",
-          note: `Đã xin chứng từ đơn ${order.orderId}`,
-        });
         successCount++;
         console.log(`Đã xin chứng từ đơn ${order.orderId}`);
       } catch (error) {
@@ -258,7 +253,7 @@ async function buildDocmentMisaStockOrder() {
         await ActivityLog.create({
           name: "System",
           type: "accounting",
-          note: `Lỗi xin chứng từ đơn ${order.orderId}`,
+          note: `Lỗi xin chứng từ đơn ${order.orderId}: ${error.message}`,
         });
         console.error(`Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
       }
