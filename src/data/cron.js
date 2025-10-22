@@ -15,10 +15,12 @@ const Order = require("../models/order.model");
 const { postSaleDocumentMisaService } = require("../services/misa.service");
 const EbizMisaDone = require("../models/misa_done.model");
 const OrderDetail = require("../models/order_detail.model");
+const EbizMisaCancel = require("../models/misa_cancel.model");
 
 cron.schedule("0,20,40 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
 cron.schedule("0,30 * * * *", async () => buildDocmentMisaStockOrder());
+cron.schedule("28,58 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
   sendSse({
     status: "health",
@@ -35,6 +37,67 @@ cron.schedule("29,59 * * * *", () => {
   console.log("Prepare Sync Haravan...");
 });
 cron.schedule("0 0 * * *", async () => cronDeleteOrder());
+
+async function cronMoveCancelledOrders() {
+  try {
+    console.log("Bắt đầu kiểm tra đơn huỷ MISA...");
+
+    // Lấy các đơn đã xin chứng từ (EbizMisaDone)
+    const misaDoneOrders = await EbizMisaDone.findAll({
+      attributes: [
+        "orderId",
+        "haravanId",
+        "saleDate",
+        "financialStatus",
+        "carrierStatus",
+        "realCarrierStatus",
+        "totalPrice",
+        "totalLineItemPrice",
+        "totalDiscountPrice",
+        "refId",
+        "refDetailId",
+        "trackingNumber",
+        "cancelledStatus",
+        "isSPXFast",
+        "source",
+        "note",
+      ],
+      raw: true,
+    });
+
+    if (misaDoneOrders.length === 0) {
+      console.log("Không có đơn MISA nào để đối chiếu huỷ.");
+      return;
+    }
+
+    // Lấy danh sách orderId đã bị huỷ từ Haravan
+    const cancelledOrders = await Order.findAll({
+      attributes: ["orderId"],
+      where: { cancelledStatus: "cancelled" },
+      raw: true,
+    });
+
+    const cancelledOrderIds = new Set(cancelledOrders.map((o) => o.orderId));
+
+    let movedCount = 0;
+
+    for (const doneOrder of misaDoneOrders) {
+      if (cancelledOrderIds.has(doneOrder.orderId)) {
+        // Nếu đơn bị huỷ thì chuyển sang EbizMisaCancel
+        await EbizMisaCancel.upsert(doneOrder);
+        await EbizMisaDone.destroy({ where: { orderId: doneOrder.orderId } });
+        movedCount++;
+        console.log(
+          `Đã chuyển đơn ${doneOrder.orderId} sang bảng EbizMisaCancel.`
+        );
+      }
+    }
+
+    console.log(`Hoàn tất đối chiếu: ${movedCount} đơn bị huỷ được chuyển.`);
+  } catch (error) {
+    console.error("Lỗi khi chuyển đơn bị huỷ sang MISA Cancel:", error);
+  }
+}
 
 async function cronDeleteOrder() {
   try {
