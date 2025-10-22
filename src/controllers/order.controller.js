@@ -312,7 +312,7 @@ async function runSyncHaravanOrders() {
     }
 
     console.log(
-      `🎯 Hoàn tất đồng bộ: ${successCount} đơn thành công, ${failedCount} đơn lỗi.`
+      `Hoàn tất đồng bộ: ${successCount} đơn thành công, ${failedCount} đơn lỗi.`
     );
     return { synced: successCount, failed: failedCount };
   } catch (error) {

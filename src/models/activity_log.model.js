@@ -16,7 +16,8 @@ const ActivityLog = sequelize.define(
         "try-login",
         "logout",
         "stock",
-        "confirm"
+        "confirm",
+        "accounting"
       ),
       allowNull: false,
     },

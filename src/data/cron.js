@@ -16,7 +16,7 @@ const { postSaleDocumentMisaService } = require("../services/misa.service");
 const EbizMisaDone = require("../models/misa_done.model");
 const OrderDetail = require("../models/order_detail.model");
 
-cron.schedule("0,30 * * * *", async () => cronSyncHaravanOrder());
+cron.schedule("0,20,40 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("*/10 * * * *", async () => cronSyncAttendanceGoogleSheet());
 cron.schedule("0,30 * * * *", async () => buildDocmentMisaStockOrder());
 cron.schedule("*/30 * * * * *", () => {
@@ -81,7 +81,7 @@ async function misaCronInitData() {
       stocks: stock.total,
     });
   } catch (err) {
-    console.error(" Cron MISA Error:", err.message);
+    console.error("Đồng bộ tự động lỗi:", err.message);
   }
 }
 
@@ -125,6 +125,8 @@ async function buildDocmentMisaStockOrder() {
   try {
     const startOfDay = dayjs().subtract(3, "day").startOf("day").toDate();
     const endOfDay = dayjs().endOf("day").toDate();
+    let successCount = 0;
+    let failedCount = 0;
 
     const stockOrders = await Order.findAll({
       where: {
@@ -180,12 +182,17 @@ async function buildDocmentMisaStockOrder() {
           refDetailId,
         });
         await order.update({ status: "completed" });
+        successCount++;
         console.log(`Đã xin chứng từ đơn ${order.orderId}`);
       } catch (error) {
+        failedCount++;
         console.error(` Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
       }
       await delay(5000);
     }
+    console.log(
+      `Hoàn tất lập chứng từ: ${successCount} đơn thành công, ${failedCount} đơn lỗi.`
+    );
   } catch (error) {
     console.error(`Lỗi tự động Misa:`, error);
   }

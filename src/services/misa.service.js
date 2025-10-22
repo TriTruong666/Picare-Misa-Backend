@@ -261,7 +261,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
     return { data: res.data, refId, refDetailId };
   } catch (err) {
-    console.error(" Misa Error:", err.message);
+    // console.error(" Misa Error:", err.message);
     throw err;
   }
 }
