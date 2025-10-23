@@ -18,11 +18,9 @@ const OrderDetail = require("../models/order_detail.model");
 const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
 
-cron.schedule("0,5,10,15,20,30,40,50 * * * *", async () =>
-  cronSyncHaravanOrder()
-);
+cron.schedule("0,20,40 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("*/5 * * * *", async () => cronSyncAttendanceGoogleSheet());
-cron.schedule("0,7,14,21,28 * * * *", async () => buildDocmentMisaStockOrder());
+cron.schedule("0,30 * * * *", async () => cronBuildDocumentMisa());
 cron.schedule("28,58 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
   sendSse({
@@ -39,7 +37,31 @@ cron.schedule("29,59 * * * *", () => {
   });
   console.log("Prepare Sync Haravan...");
 });
-cron.schedule("0 0 * * *", async () => cronDeleteOrder());
+cron.schedule("0 * * *", async () => cronDeleteOrder());
+cron.schedule("0 * * *", async () => cronDeleteActivityLogs());
+
+async function cronDeleteActivityLogs() {
+  try {
+    const startDate = dayjs().subtract(7, "day").startOf("day").toDate();
+    const endDate = dayjs().subtract(1, "day").endOf("day").toDate();
+    const logs = await ActivityLog.findAll({
+      where: {
+        [Op.between]: [startDate, endDate],
+      },
+      order: [["createdAt", "ASC"]],
+    });
+    if (logs.length === 0) {
+      throw new Error("Không có logs để xoá");
+    }
+    for (const log of logs) {
+      await log.destroy();
+
+      console.log(`Đã tự động xoá log ${log.id}`);
+    }
+  } catch (error) {
+    throw error;
+  }
+}
 
 async function cronMoveCancelledOrders() {
   try {
@@ -88,8 +110,14 @@ async function cronMoveCancelledOrders() {
       if (cancelledOrderIds.has(doneOrder.orderId)) {
         // Nếu đơn bị huỷ thì chuyển sang EbizMisaCancel
         await EbizMisaCancel.upsert(doneOrder);
+        await ActivityLog.create({
+          name: "System",
+          type: "accounting",
+          note: `Đã chuyển đơn ${doneOrder.orderId} sang bảng EbizMisaCancel.`,
+        });
         await EbizMisaDone.destroy({ where: { orderId: doneOrder.orderId } });
         movedCount++;
+
         console.log(
           `Đã chuyển đơn ${doneOrder.orderId} sang bảng EbizMisaCancel.`
         );
@@ -187,7 +215,7 @@ function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function buildDocmentMisaStockOrder() {
+async function cronBuildDocumentMisa() {
   try {
     const startOfDay = dayjs().subtract(3, "day").startOf("day").toDate();
     const endOfDay = dayjs().endOf("day").toDate();
