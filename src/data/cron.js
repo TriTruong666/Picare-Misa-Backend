@@ -37,8 +37,8 @@ cron.schedule("29,59 * * * *", () => {
   });
   console.log("Prepare Sync Haravan...");
 });
-cron.schedule("0 * * *", async () => cronDeleteOrder());
-cron.schedule("0 * * *", async () => cronDeleteActivityLogs());
+cron.schedule("0 0 * * *", async () => cronDeleteOrder());
+cron.schedule("0 0 * * *", async () => cronDeleteActivityLogs());
 
 async function cronDeleteActivityLogs() {
   try {
@@ -46,10 +46,13 @@ async function cronDeleteActivityLogs() {
     const endDate = dayjs().subtract(1, "day").endOf("day").toDate();
     const logs = await ActivityLog.findAll({
       where: {
-        [Op.between]: [startDate, endDate],
+        createdAt: {
+          [Op.between]: [startDate, endDate],
+        },
       },
       order: [["createdAt", "ASC"]],
     });
+
     if (logs.length === 0) {
       throw new Error("Không có logs để xoá");
     }
