@@ -1,7 +1,7 @@
 const AttendanceServer = require("../models/attendance_server.model");
 const AttendanceUser = require("../models/attendance_user.model");
 const { google } = require("googleapis");
-const pLimit = require("p-limit");
+const pLimit = require("p-limit").default;
 const path = require("path");
 const { getAllAttendanceLogs } = require("../services/hik.service");
 

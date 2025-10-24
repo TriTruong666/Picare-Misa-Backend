@@ -210,7 +210,7 @@ async function cronSyncAttendance() {
 
     console.log("Đồng bộ chấm công tự động thành công");
   } catch (err) {
-    console.error("❌ Cron job error:", err.message || err);
+    console.error("Cron job error:", err.message || err);
   }
 }
 
