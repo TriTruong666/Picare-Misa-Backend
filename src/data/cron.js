@@ -48,11 +48,11 @@ async function cronDeleteAttendanceLogs() {
     const endDate = dayjs().subtract(3, "day").endOf("day").toDate();
     const attendanceLogs = await AttendanceUser.findAll({
       where: {
-        createdAt: {
+        checkinTime: {
           [Op.between]: [startDate, endDate],
         },
       },
-      order: [["createdAt", "ASC"]],
+      order: [["checkinTime", "ASC"]],
     });
     if (logs.length === 0) {
       console.log("Không có logs chấm công để xoá");
