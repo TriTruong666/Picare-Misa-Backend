@@ -99,7 +99,7 @@ async function getAllAttendanceLogs(username, password, url, type) {
             searchResultPosition: offset,
             maxResults: maxResults,
             major: 0,
-            minor: 75,
+            minor: type,
             startTime,
             endTime,
           },
