@@ -206,8 +206,13 @@ async function syncAttendanceEmployeeAll(type) {
   const resultsPromises = await Promise.all(
     servers.map((server) =>
       limit(async () => {
-        const result = await syncAttendanceEmployee(server.serverId, type);
-        return { server: server.serverName, message: result.message };
+        try {
+          const result = await syncAttendanceEmployee(server.serverId, type);
+          return { server: server.serverName, message: result.message };
+        } catch (err) {
+          console.error(`Lỗi khi đồng bộ ${server.serverName}:`, err.message);
+          return { server: server.serverName, message: err.message };
+        }
       })
     )
   );
