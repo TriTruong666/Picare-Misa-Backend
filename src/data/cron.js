@@ -54,7 +54,7 @@ async function cronDeleteAttendanceLogs() {
       },
       order: [["checkinTime", "ASC"]],
     });
-    if (logs.length === 0) {
+    if (attendanceLogs.length === 0) {
       console.log("Không có logs chấm công để xoá");
     }
 
