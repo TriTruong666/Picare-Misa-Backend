@@ -10,9 +10,9 @@ const {
   initialMisaConnection,
   syncDataMisa,
 } = require("../controllers/misa.controller");
+const { postSaleDocumentMisaService } = require("../services/misa.service");
 const MisaConfig = require("../models/misa_config.model");
 const Order = require("../models/order.model");
-const { postSaleDocumentMisaService } = require("../services/misa.service");
 const EbizMisaDone = require("../models/misa_done.model");
 const OrderDetail = require("../models/order_detail.model");
 const EbizMisaCancel = require("../models/misa_cancel.model");
@@ -31,13 +31,12 @@ cron.schedule("*/30 * * * * *", () => {
   });
 });
 cron.schedule("0,20,40 * * * *", async () => misaCronInitData());
-cron.schedule("29,59 * * * *", () => {
+cron.schedule("27,57 * * * *", () => {
   sendSse({
     status: "warning",
     message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
     type: "notification",
   });
-  console.log("Prepare Sync Haravan...");
 });
 cron.schedule("0 0 * * *", async () => cronDeleteOrder());
 cron.schedule("0 0 * * *", async () => cronDeleteActivityLogs());
