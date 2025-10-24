@@ -67,8 +67,8 @@ async function cronDeleteAttendanceLogs() {
         throw new Error(`Lỗi xoá log ${log.id}: ${error.message}`);
       }
       await delay(100);
-      console.log(`Đã xóa tự động ${countLogs} chấm công`);
     }
+    console.log(`Đã xóa tự động ${countLogs} chấm công`);
   } catch (error) {
     console.error(error);
   }
