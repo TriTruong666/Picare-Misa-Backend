@@ -18,10 +18,10 @@ const OrderDetail = require("../models/order_detail.model");
 const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
 
-cron.schedule("0,20,40 * * * *", async () => cronSyncHaravanOrder());
-cron.schedule("*/5 * * * *", async () => cronSyncAttendanceGoogleSheet());
+cron.schedule("28,58 * * * *", async () => cronSyncHaravanOrder());
+cron.schedule("*/15 * * * *", async () => cronSyncAttendance());
 cron.schedule("0,30 * * * *", async () => cronBuildDocumentMisa());
-cron.schedule("28,58 * * * *", async () => cronMoveCancelledOrders());
+cron.schedule("29,59 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
   sendSse({
     status: "health",
@@ -203,7 +203,7 @@ async function cronSyncHaravanOrder() {
   }
 }
 
-async function cronSyncAttendanceGoogleSheet() {
+async function cronSyncAttendance() {
   try {
     await syncAttendanceEmployeeAll(75);
     await syncAttendanceEmployeeAll(104);

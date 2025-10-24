@@ -1,6 +1,7 @@
 const AttendanceServer = require("../models/attendance_server.model");
 const AttendanceUser = require("../models/attendance_user.model");
 const { google } = require("googleapis");
+const pLimit = require("p-limit");
 const path = require("path");
 const { getAllAttendanceLogs } = require("../services/hik.service");
 
@@ -196,28 +197,24 @@ async function syncAttendanceEmployee(serverId, type) {
 }
 
 async function syncAttendanceEmployeeAll(type) {
+  const limit = pLimit(5);
   const servers = await AttendanceServer.findAll();
   if (servers.length === 0) {
     return { message: "Không có máy chủ nào để đồng bộ" };
   }
-  const results = [];
 
-  for (const server of servers) {
-    try {
-      const result = await syncAttendanceEmployee(server.serverId, type);
-      results.push({ server: server.serverName, message: result.message });
-    } catch (err) {
-      console.error(
-        `❌ Lỗi khi đồng bộ server ${server.serverName}:`,
-        err.message
-      );
-      results.push({
-        server: server.serverName,
-        message: err.message,
-      });
-    }
-  }
-  return { message: "Đã đồng bộ tất cả dữ liệu chấm công thành công", results };
+  const resultsPromises = await Promise.all(
+    servers.map((server) =>
+      limit(async () => {
+        const result = await syncAttendanceEmployee(server.serverId, type);
+        return { server: server.serverName, message: result.message };
+      })
+    )
+  );
+  return {
+    message: "Đã đồng bộ tất cả dữ liệu chấm công thành công",
+    resultsPromises,
+  };
 }
 
 const auth = new google.auth.GoogleAuth({

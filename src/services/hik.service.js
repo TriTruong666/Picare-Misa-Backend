@@ -120,7 +120,6 @@ async function getAllAttendanceLogs(username, password, url, type) {
     console.log(`Tổng log chấm công: ${allLogs.length}`);
     return allLogs;
   } catch (err) {
-    console.error("❌ Error fetching attendance logs:", err);
     throw err;
   }
 }
