@@ -46,7 +46,7 @@ async function cronDeleteAttendanceLogs() {
   try {
     const startDate = dayjs().subtract(30, "day").startOf("day").toDate();
     const endDate = dayjs().subtract(3, "day").endOf("day").toDate();
-    const countLogs = 0;
+    let countLogs = 0;
     const attendanceLogs = await AttendanceUser.findAll({
       where: {
         checkinTime: {
