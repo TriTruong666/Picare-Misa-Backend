@@ -21,7 +21,7 @@ const AttendanceUser = require("../models/attendance_user.model");
 
 cron.schedule("28,58 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("*/15 * * * *", async () => cronSyncAttendance());
-cron.schedule("*/5 * * * *", async () => cronDeleteAttendanceLogs());
+cron.schedule("*/10 * * * *", async () => cronDeleteAttendanceLogs());
 cron.schedule("0,30 * * * *", async () => cronBuildDocumentMisa());
 cron.schedule("29,59 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
@@ -62,11 +62,12 @@ async function cronDeleteAttendanceLogs() {
     for (const log of attendanceLogs) {
       try {
         await log.destroy();
+        console.log("Đang xóa...");
         countLogs++;
       } catch (error) {
         throw new Error(`Lỗi xoá log ${log.id}: ${error.message}`);
       }
-      await delay(100);
+      await delay(10);
     }
     console.log(`Đã xóa tự động ${countLogs} chấm công`);
   } catch (error) {
