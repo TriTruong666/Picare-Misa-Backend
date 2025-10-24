@@ -46,6 +46,7 @@ async function cronDeleteAttendanceLogs() {
   try {
     const startDate = dayjs().subtract(30, "day").startOf("day").toDate();
     const endDate = dayjs().subtract(3, "day").endOf("day").toDate();
+    const countLogs = 0;
     const attendanceLogs = await AttendanceUser.findAll({
       where: {
         checkinTime: {
@@ -61,12 +62,12 @@ async function cronDeleteAttendanceLogs() {
     for (const log of attendanceLogs) {
       try {
         await log.destroy();
-
-        console.log(`Đã tự động xoá log ${log.id}`);
+        count++;
       } catch (error) {
         throw new Error(`Lỗi xoá log ${log.id}: ${error.message}`);
       }
       await delay(100);
+      console.log(`Đã xóa tự động ${countLogs} chấm công`);
     }
   } catch (error) {
     console.error(error);
