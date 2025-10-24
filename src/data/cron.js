@@ -62,7 +62,7 @@ async function cronDeleteAttendanceLogs() {
     for (const log of attendanceLogs) {
       try {
         await log.destroy();
-        count++;
+        countLogs++;
       } catch (error) {
         throw new Error(`Lỗi xoá log ${log.id}: ${error.message}`);
       }
