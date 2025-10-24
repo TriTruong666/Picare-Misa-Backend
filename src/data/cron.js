@@ -17,9 +17,11 @@ const EbizMisaDone = require("../models/misa_done.model");
 const OrderDetail = require("../models/order_detail.model");
 const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
+const AttendanceUser = require("../models/attendance_user.model");
 
 cron.schedule("28,58 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("*/15 * * * *", async () => cronSyncAttendance());
+cron.schedule("*/5 * * * *", async () => cronDeleteAttendanceLogs());
 cron.schedule("0,30 * * * *", async () => cronBuildDocumentMisa());
 cron.schedule("29,59 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
@@ -40,6 +42,37 @@ cron.schedule("29,59 * * * *", () => {
 cron.schedule("0 0 * * *", async () => cronDeleteOrder());
 cron.schedule("0 0 * * *", async () => cronDeleteActivityLogs());
 
+async function cronDeleteAttendanceLogs() {
+  try {
+    const startDate = dayjs().subtract(30, "day").startOf("day").toDate();
+    const endDate = dayjs().subtract(3, "day").endOf("day").toDate();
+    const attendanceLogs = await AttendanceUser.findAll({
+      where: {
+        createdAt: {
+          [Op.between]: [startDate, endDate],
+        },
+      },
+      order: [["createdAt", "ASC"]],
+    });
+    if (logs.length === 0) {
+      console.log("Không có logs chấm công để xoá");
+    }
+
+    for (const log of attendanceLogs) {
+      try {
+        await log.destroy();
+
+        console.log(`Đã tự động xoá log ${log.id}`);
+      } catch (error) {
+        throw new Error(`Lỗi xoá log ${log.id}: ${error.message}`);
+      }
+      await delay(100);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function cronDeleteActivityLogs() {
   try {
     const startDate = dayjs().subtract(7, "day").startOf("day").toDate();
@@ -54,15 +87,20 @@ async function cronDeleteActivityLogs() {
     });
 
     if (logs.length === 0) {
-      throw new Error("Không có logs để xoá");
+      console.log("Không có logs để xoá");
     }
     for (const log of logs) {
-      await log.destroy();
+      try {
+        await log.destroy();
 
-      console.log(`Đã tự động xoá log ${log.id}`);
+        console.log(`Đã tự động xoá log ${log.id}`);
+      } catch (error) {
+        throw new Error(`Lỗi xoá log ${log.id}: ${error.message}`);
+      }
+      await delay(100);
     }
   } catch (error) {
-    throw error;
+    console.error(error);
   }
 }
 
