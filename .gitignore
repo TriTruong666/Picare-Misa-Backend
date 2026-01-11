@@ -12,5 +12,5 @@
 .env*
 
 # JSON File
-seeding.json
+user_seed.json
 account-service.json
