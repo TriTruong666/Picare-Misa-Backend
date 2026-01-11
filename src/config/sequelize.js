@@ -1,21 +1,24 @@
 const { Sequelize } = require("sequelize");
 
+const isProd = process.env.NODE_ENV === "production";
+
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
   process.env.DB_PASSWORD,
   {
-    host: process.env.DB_SERVER,
-    port: process.env.DB_PORT || 1433,
-    dialect: "mssql",
-    dialectOptions: {
-      options: {
-        encrypt: false, // local thì để false
-        trustServerCertificate: true,
-      },
-    },
-    timezone: "+07:00",
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: "postgres",
     logging: false,
+    dialectOptions: isProd
+      ? {
+          ssl: {
+            require: true,
+            rejectUnauthorized: false,
+          },
+        }
+      : {},
   }
 );
 

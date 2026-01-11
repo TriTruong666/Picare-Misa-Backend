@@ -8,16 +8,16 @@ const OrderDetail = require("../models/order_detail.model");
 async function connectAmisMisa() {
   try {
     const body = {
-      app_id: process.env.MISA_APP_ID,
-      access_code: process.env.MISA_ACCESS_CODE,
-      org_company_code: process.env.MISA_ORG_COMPANY_CODE,
+      app_id: process.env.MISA_PICARE_APP_ID,
+      access_code: process.env.MISA_PICARE_ACCESS_CODE,
+      org_company_code: process.env.MISA_PICARE_ORG_COMPANY_CODE,
     };
     const res = await axios.post(
       "https://actapp.misa.vn/api/oauth/actopen/connect",
       body,
       {
         headers: {
-          "X-MISA-AccessToken": process.env.MISA_ACCESS_CODE,
+          "X-MISA-AccessToken": process.env.MISA_PICARE_ACCESS_CODE,
         },
       }
     );
@@ -33,7 +33,7 @@ async function postMisaDataService(accessToken, type = 1) {
     branch_id: null,
     skip: 0,
     take: 1000,
-    app_id: process.env.MISA_APP_ID,
+    app_id: process.env.MISA_PICARE_APP_ID,
     last_sync_time: null,
   };
   try {
@@ -248,7 +248,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
     const body = {
       org_company_code: "k6aguh1l",
-      app_id: process.env.MISA_APP_ID,
+      app_id: process.env.MISA_PICARE_APP_ID,
       voucher: [voucher],
     };
     const res = await axios.post(
@@ -274,7 +274,7 @@ async function deleteMisaDataService() {
           org_refid: "db7abc10-f07f-4349-bb3c-41783a519071",
         },
       ],
-      app_id: process.env.MISA_APP_ID,
+      app_id: process.env.MISA_PICARE_APP_ID,
       org_company_code: "k6aguh1l",
     };
     const res = await axios.delete(

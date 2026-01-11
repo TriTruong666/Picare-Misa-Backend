@@ -7,9 +7,9 @@ const AttendanceUser = sequelize.define(
   "AttendanceUser",
   {
     id: {
-      type: DataTypes.STRING(36),
+      type: DataTypes.UUID,
       primaryKey: true,
-      defaultValue: () => uuidv4(),
+      defaultValue: DataTypes.UUIDV4,
     },
     empId: {
       type: DataTypes.STRING,
@@ -24,11 +24,14 @@ const AttendanceUser = sequelize.define(
       allowNull: true,
     },
     type: {
-      type: DataTypes.ENUM("face", "fingerprint"),
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [["face", "fingerprint"]],
+      },
       allowNull: false,
     },
     serverId: {
-      type: DataTypes.STRING(36),
+      type: DataTypes.UUID,
       allowNull: false,
       references: {
         model: AttendanceServer,
@@ -39,7 +42,7 @@ const AttendanceUser = sequelize.define(
   },
   {
     timestamps: false,
-    tableName: "AttendanceUser",
+    tableName: "attendance_user",
   }
 );
 

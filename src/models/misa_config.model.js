@@ -16,7 +16,7 @@ const MisaConfig = sequelize.define(
   },
   {
     timestamps: true,
-    tableName: "MisaConfig",
+    tableName: "misa_configs",
   }
 );
 

@@ -19,7 +19,7 @@ const MisaCustomer = sequelize.define(
       allowNull: false,
     },
     account_object_group_id_list: {
-      type: DataTypes.STRING(36),
+      type: DataTypes.UUID,
       allowNull: true,
     },
     account_object_group_name_list: {
@@ -37,7 +37,7 @@ const MisaCustomer = sequelize.define(
   },
   {
     timestamps: false,
-    tableName: "MisaCustomer",
+    tableName: "misa_customers",
   }
 );
 

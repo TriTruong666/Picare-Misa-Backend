@@ -4,7 +4,7 @@ const User = require("../models/user.model");
 
 async function seedingUsers() {
   try {
-    const filePath = path.join(__dirname, "../../seeding.json");
+    const filePath = path.join(__dirname, "../../user_seed.json");
     const rawData = fs.readFileSync(filePath, "utf-8");
     const users = JSON.parse(rawData);
 

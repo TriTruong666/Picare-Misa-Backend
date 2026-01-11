@@ -1,24 +1,21 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/sequelize");
-const { v4: uuidv4 } = require("uuid");
 
 const ActivityLog = sequelize.define(
   "ActivityLog",
   {
     logId: {
-      type: DataTypes.STRING(36),
-      defaultValue: () => uuidv4(),
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
     type: {
-      type: DataTypes.ENUM(
-        "invoice",
-        "try-login",
-        "logout",
-        "stock",
-        "confirm",
-        "accounting"
-      ),
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [
+          ["invoice", "try-login", "logout", "stock", "confirm", "accounting"],
+        ],
+      },
       allowNull: false,
     },
     userId: {
@@ -35,7 +32,7 @@ const ActivityLog = sequelize.define(
   },
   {
     timestamps: true,
-    tableName: "ActivityLog",
+    tableName: "activity_logs",
   }
 );
 

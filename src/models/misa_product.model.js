@@ -33,7 +33,7 @@ const MisaProduct = sequelize.define(
   },
   {
     timestamps: false,
-    tableName: "MisaProduct",
+    tableName: "misa_product",
   }
 );
 

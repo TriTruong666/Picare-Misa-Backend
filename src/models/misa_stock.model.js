@@ -5,7 +5,7 @@ const MisaStock = sequelize.define(
   "MisaStock",
   {
     stock_id: {
-      type: DataTypes.STRING(36),
+      type: DataTypes.UUID,
       allowNull: false,
       unique: true,
       primaryKey: true,
@@ -25,7 +25,7 @@ const MisaStock = sequelize.define(
   },
   {
     timestamps: false,
-    tableName: "MisaStock",
+    tableName: "misa_stock",
   }
 );
 

@@ -12,8 +12,8 @@ const User = sequelize.define(
       autoIncrement: true,
     },
     userId: {
-      type: DataTypes.STRING(36),
-      defaultValue: () => uuidv4(),
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
       allowNull: false,
       unique: true,
     },
@@ -31,16 +31,17 @@ const User = sequelize.define(
       allowNull: false,
     },
     role: {
-      type: DataTypes.ENUM("admin", "staff", "accountant"),
+      type: DataTypes.STRING,
+      validate: { isIn: [["admin", "staff", "accountant", "user"]] },
       allowNull: false,
       defaultValue: "user",
     },
     note: {
-      type: DataTypes.TEXT(),
+      type: DataTypes.TEXT,
     },
   },
   {
-    tableName: "Users",
+    tableName: "users",
     timestamps: true,
     hooks: {
       beforeCreate: async (user) => {

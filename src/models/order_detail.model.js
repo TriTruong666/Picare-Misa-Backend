@@ -19,7 +19,7 @@ const OrderDetail = sequelize.define(
       allowNull: false,
     },
     price: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     qty: {
@@ -33,7 +33,7 @@ const OrderDetail = sequelize.define(
   },
   {
     timestamps: false,
-    tableName: "OrderDetails",
+    tableName: "order_details",
   }
 );
 

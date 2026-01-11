@@ -24,14 +24,19 @@ const EbizMisaDone = sequelize.define(
       allowNull: false,
     },
     financialStatus: {
-      type: DataTypes.ENUM(
-        "pending",
-        "paid",
-        "partially_paid",
-        "refunded",
-        "voided",
-        "partially_refunded"
-      ),
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [
+          [
+            "pending",
+            "paid",
+            "partially_paid",
+            "refunded",
+            "voided",
+            "partially_refunded",
+          ],
+        ],
+      },
       allowNull: false,
     },
     carrierStatus: {
@@ -43,15 +48,15 @@ const EbizMisaDone = sequelize.define(
       allowNull: true,
     },
     totalPrice: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     totalLineItemPrice: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     totalDiscountPrice: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     refId: {
@@ -63,7 +68,10 @@ const EbizMisaDone = sequelize.define(
       allowNull: false,
     },
     cancelledStatus: {
-      type: DataTypes.ENUM("cancelled", "uncancelled"),
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [["cancelled", "uncancelled"]],
+      },
       allowNull: false,
     },
     trackingNumber: {
@@ -71,7 +79,10 @@ const EbizMisaDone = sequelize.define(
       allowNull: true,
     },
     isSPXFast: {
-      type: DataTypes.ENUM("normal", "fast"),
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [["normal", "fast"]],
+      },
       allowNull: false,
     },
     source: {
@@ -84,7 +95,7 @@ const EbizMisaDone = sequelize.define(
   },
   {
     timestamps: false,
-    tableName: "EbizMisaDone",
+    tableName: "ebiz_misa_done",
   }
 );
 

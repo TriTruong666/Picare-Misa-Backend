@@ -6,10 +6,10 @@ const AttendanceServer = sequelize.define(
   "AttendanceServer",
   {
     serverId: {
-      type: DataTypes.STRING(36),
+      type: DataTypes.UUID,
       unique: true,
       primaryKey: true,
-      defaultValue: () => uuidv4(),
+      defaultValue: DataTypes.UUIDV4,
       allowNull: false,
     },
     serverName: {
@@ -37,7 +37,7 @@ const AttendanceServer = sequelize.define(
   },
   {
     timestamps: true,
-    tableName: "AttendanceServer",
+    tableName: "attendance_server",
   }
 );
 

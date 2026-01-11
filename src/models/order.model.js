@@ -24,14 +24,19 @@ const Order = sequelize.define(
       allowNull: false,
     },
     financialStatus: {
-      type: DataTypes.ENUM(
-        "pending",
-        "paid",
-        "partially_paid",
-        "refunded",
-        "voided",
-        "partially_refunded"
-      ),
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [
+          [
+            "pending",
+            "paid",
+            "partially_paid",
+            "refunded",
+            "voided",
+            "partially_refunded",
+          ],
+        ],
+      },
       allowNull: false,
     },
     carrierStatus: {
@@ -43,19 +48,22 @@ const Order = sequelize.define(
       allowNull: true,
     },
     totalPrice: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     totalLineItemPrice: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     totalDiscountPrice: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
     },
     cancelledStatus: {
-      type: DataTypes.ENUM("cancelled", "uncancelled"),
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [["cancelled", "uncancelled"]],
+      },
       allowNull: false,
     },
     trackingNumber: {
@@ -63,7 +71,10 @@ const Order = sequelize.define(
       allowNull: true,
     },
     isSPXFast: {
-      type: DataTypes.ENUM("normal", "fast"),
+      type: DataTypes.STRING,
+      validate: {
+        isIn: [["normal", "fast"]],
+      },
       allowNull: false,
     },
     source: {
@@ -71,7 +82,8 @@ const Order = sequelize.define(
       allowNull: false,
     },
     status: {
-      type: DataTypes.ENUM("invoice", "stock", "pending", "completed"),
+      type: DataTypes.STRING,
+      validate: { isIn: [["invoice", "stock", "pending", "completed"]] },
       allowNull: true,
     },
     note: {
@@ -80,7 +92,7 @@ const Order = sequelize.define(
   },
   {
     timestamps: false,
-    tableName: "Orders",
+    tableName: "orders",
   }
 );
 
