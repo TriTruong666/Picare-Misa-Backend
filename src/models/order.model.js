@@ -13,15 +13,18 @@ const Order = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: false,
       unique: true,
+      field: "order_id",
     },
     haravanId: {
       type: DataTypes.BIGINT,
       allowNull: false,
       unique: true,
+      field: "haravan_id",
     },
     saleDate: {
       type: DataTypes.DATE,
       allowNull: false,
+      field: "sale_date",
     },
     financialStatus: {
       type: DataTypes.STRING,
@@ -38,26 +41,32 @@ const Order = sequelize.define(
         ],
       },
       allowNull: false,
+      field: "financial_status",
     },
     carrierStatus: {
       type: DataTypes.STRING,
       allowNull: true,
+      field: "carrier_status",
     },
     realCarrierStatus: {
       type: DataTypes.STRING,
       allowNull: true,
+      field: "real_carrier_status",
     },
     totalPrice: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
+      field: "total_price",
     },
     totalLineItemPrice: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
+      field: "total_line_item_price",
     },
     totalDiscountPrice: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: false,
+      field: "total_discount_price",
     },
     cancelledStatus: {
       type: DataTypes.STRING,
@@ -65,10 +74,12 @@ const Order = sequelize.define(
         isIn: [["cancelled", "uncancelled"]],
       },
       allowNull: false,
+      field: "cancelled_status",
     },
     trackingNumber: {
       type: DataTypes.STRING,
       allowNull: true,
+      field: "tracking_number",
     },
     isSPXFast: {
       type: DataTypes.STRING,
@@ -76,6 +87,7 @@ const Order = sequelize.define(
         isIn: [["normal", "fast"]],
       },
       allowNull: false,
+      field: "is_spx_fast",
     },
     source: {
       type: DataTypes.STRING,

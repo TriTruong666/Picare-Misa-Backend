@@ -13,6 +13,7 @@ const OrderDetail = sequelize.define(
     orderId: {
       type: DataTypes.STRING(100),
       allowNull: false,
+      field: "order_id",
     },
     sku: {
       type: DataTypes.STRING(100),
@@ -29,6 +30,7 @@ const OrderDetail = sequelize.define(
     productName: {
       type: DataTypes.STRING(),
       allowNull: false,
+      field: "product_name",
     },
   },
   {

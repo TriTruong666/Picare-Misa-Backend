@@ -8,6 +8,7 @@ const ActivityLog = sequelize.define(
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
+      field: "log_id",
     },
     type: {
       type: DataTypes.STRING,
@@ -21,6 +22,7 @@ const ActivityLog = sequelize.define(
     userId: {
       type: DataTypes.STRING,
       allowNull: true,
+      field: "user_id",
     },
     name: {
       type: DataTypes.STRING,

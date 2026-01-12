@@ -61,7 +61,7 @@ class OrderController {
         order: [
           [
             literal(
-              `CASE WHEN cancelledStatus = 'cancelled' THEN 1 ELSE 0 END`
+              `CASE WHEN cancelled_status = 'cancelled' THEN 1 ELSE 0 END`
             ),
             "ASC",
           ],

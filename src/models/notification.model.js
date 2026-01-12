@@ -10,6 +10,7 @@ const Notification = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
       unique: true,
+      field: "notification_id",
     },
     title: {
       type: DataTypes.STRING,

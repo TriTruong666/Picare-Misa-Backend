@@ -14,14 +14,17 @@ const AttendanceUser = sequelize.define(
     empId: {
       type: DataTypes.STRING,
       allowNull: false,
+      field: "emp_id",
     },
     empName: {
       type: DataTypes.STRING,
       allowNull: true,
+      field: "emp_name",
     },
     checkinTime: {
       type: DataTypes.STRING,
       allowNull: true,
+      field: "check_in_time",
     },
     type: {
       type: DataTypes.STRING,
@@ -33,11 +36,11 @@ const AttendanceUser = sequelize.define(
     serverId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: "server_id",
       references: {
         model: AttendanceServer,
-        key: "serverId",
+        key: "server_id",
       },
-      onDelete: "CASCADE",
     },
   },
   {
@@ -47,10 +50,11 @@ const AttendanceUser = sequelize.define(
 );
 
 AttendanceServer.hasMany(AttendanceUser, {
-  foreignKey: "serverId",
-  sourceKey: "serverId",
+  foreignKey: "serverId", // attribute
+  sourceKey: "serverId", // attribute
   as: "attendance_data",
 });
+
 AttendanceUser.belongsTo(AttendanceServer, {
   foreignKey: "serverId",
   targetKey: "serverId",

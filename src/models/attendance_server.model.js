@@ -11,11 +11,13 @@ const AttendanceServer = sequelize.define(
       primaryKey: true,
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
+      field: "server_id",
     },
     serverName: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+      field: "server_name",
     },
     username: {
       type: DataTypes.STRING,

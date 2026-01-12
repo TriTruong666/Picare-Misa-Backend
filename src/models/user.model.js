@@ -16,6 +16,7 @@ const User = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
       unique: true,
+      field: "user_id",
     },
     name: {
       type: DataTypes.STRING(100),

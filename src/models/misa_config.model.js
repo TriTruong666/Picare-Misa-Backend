@@ -12,6 +12,7 @@ const MisaConfig = sequelize.define(
     accessToken: {
       type: DataTypes.STRING,
       unique: true,
+      field: "access_token",
     },
   },
   {
