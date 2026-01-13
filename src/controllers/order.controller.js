@@ -255,7 +255,6 @@ async function runSyncHaravanOrders() {
     for (const hvOrder of haravanOrders) {
       const orderId = hvOrder.order_number.toString();
 
-      // Dữ liệu đồng bộ từ Haravan
       const hvData = {
         haravanId: hvOrder.number,
         saleDate: hvOrder.created_at.toString(),
@@ -274,14 +273,18 @@ async function runSyncHaravanOrders() {
         totalLineItemPrice: parseFloat(hvOrder.total_line_items_price),
         totalDiscountPrice: parseFloat(hvOrder.total_discounts),
         trackingNumber: hvOrder.fulfillments?.[0]?.tracking_number || null,
+        address: `${
+          hvOrder.shipping_address.address1 || "Không có địa chỉ cụ thể"
+        } ${hvOrder.shipping_address.ward || ""} ${
+          hvOrder.shipping_address.district || ""
+        } ${hvOrder.shipping_address.province || ""}`,
+        customerName: hvOrder.shipping_address.name,
       };
 
       try {
         if (existingOrderIds.has(orderId)) {
-          // 🔁 Nếu order đã tồn tại → chỉ cập nhật field Haravan (không đụng status custom)
           await Order.update(hvData, { where: { orderId } });
         } else {
-          // 🆕 Nếu chưa tồn tại → tạo mới
           await Order.create({
             orderId,
             ...hvData,
@@ -289,7 +292,6 @@ async function runSyncHaravanOrders() {
           });
         }
 
-        // Xóa chi tiết cũ rồi thêm lại chi tiết mới
         await OrderDetail.destroy({ where: { orderId } });
         const lineItems = hvOrder.line_items.map((item) => ({
           orderId,
@@ -316,7 +318,7 @@ async function runSyncHaravanOrders() {
     );
     return { synced: successCount, failed: failedCount };
   } catch (error) {
-    console.error("❌ Lỗi toàn cục trong runSyncHaravanOrders:", error.message);
+    console.error("Lỗi toàn cục trong runSyncHaravanOrders:", error.message);
     throw error;
   }
 }

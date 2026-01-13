@@ -6,7 +6,7 @@ function authMiddleware(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // { userId, role }
+    req.user = decoded;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Token không hợp lệ hoặc hết hạn" });

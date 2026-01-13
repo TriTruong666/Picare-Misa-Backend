@@ -60,7 +60,7 @@ async function postMisaDataService(
   }
 }
 
-const sourceCustomerMap = {
+const sourceCustomerAccountObjectIdMap = {
   "Shopee Picare": "08acf98f-080c-4c74-aa72-da16642c4f0f",
   "Shopee Easydew": "76fda269-328d-4bc7-9755-0d01b05d8ccc",
   "Lazada Picare": "984b48e2-5de1-4427-bffd-7098977ed124",
@@ -69,9 +69,19 @@ const sourceCustomerMap = {
   "Tiktok Shop": "32f05ee1-d1b8-428a-905f-67914716f904",
 };
 
+const sourceCustomerAccountObjectCodeMap = {
+  "Shopee Picare": "KHACHLE_SHOPEE PICARE",
+  "Shopee Easydew": "KHACHLE_SHOPEE EASYDEW",
+  "Lazada Picare": "KHACHLE_LAZADA PICARE",
+  "Lazada Easydew": "KHACHLE_LAZADA EASYDEW",
+  Tiki: "KHACHLE_TIKI PICARE",
+  "Tiktok Shop": "KHACHLE_TIKTOK PICARE",
+};
+
 async function getCustomerFromSource(orderSource) {
-  const accountMappingId = sourceCustomerMap[orderSource];
-  return accountMappingId;
+  const accountMappingId = sourceCustomerAccountObjectIdMap[orderSource];
+  const accountMappingCode = sourceCustomerAccountObjectCodeMap[orderSource];
+  return { accountMappingCode, accountMappingId };
 }
 
 async function postSaleDocumentMisaService(accessToken, { orderId }) {
@@ -93,9 +103,10 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
     const stock = await MisaStock.findOne({
       where: { stock_code: "KHO_CHAN_HUNG" },
     });
-    const accOjbId = await getCustomerFromSource(order.source);
+    const { accountMappingCode, accountMappingId } =
+      await getCustomerFromSource(order.source);
 
-    if (!stock) throw new Error("Thiếu thông tin stock hoặc customer");
+    if (!stock) throw new Error("Thiếu thông tin stock");
 
     const refId = crypto.randomUUID();
     const refDetailId = crypto.randomUUID();
@@ -111,7 +122,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
         }
 
         const taxRate = misaProduct.tax_rate || 0;
-        const priceAfterTax = item.price; // giá client gửi đã có VAT
+        const priceAfterTax = item.price;
         const priceBeforeTax = taxRate
           ? priceAfterTax / (1 + taxRate / 100)
           : priceAfterTax;
@@ -134,7 +145,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           unit_id: misaProduct.unit_id,
           unit_name: misaProduct.unit_name,
 
-          account_object_id: accOjbId,
+          account_object_id: accountMappingId,
           sort_order: index + 1,
 
           quantity: item.qty,
@@ -197,10 +208,10 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
       branch_id: "f8088e57-2ec5-4ddc-943e-783179ad001d",
 
       // customer info
-      account_object_id: customer.account_object_id,
-      account_object_address: customer.address,
-      account_object_name: customer.account_object_name,
-      account_object_code: customer.account_object_code,
+      account_object_id: accountMappingId,
+      account_object_address: order.address,
+      account_object_name: order.customerName,
+      account_object_code: accountMappingCode,
 
       refdate: order.createdAt,
 
@@ -210,10 +221,10 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
       due_day: 15,
       is_calculated_cost: false,
       exchange_rate: 1,
-      journal_memo: `${order.orderId} - ${customer.account_object_name} ${
+      journal_memo: `${order.orderId} - ${order.customerName} ${
         order.totalDiscountPrice > 0 ? "- CoCK" : ""
       } `,
-      shipping_address: customer.address,
+      shipping_address: order.address,
       currency_id: "VND",
       discount_type: 1,
       discount_rate_voucher: 0,
@@ -236,7 +247,6 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
       total_invoice_amount: total_amount,
       total_invoice_amount_oc: total_amount,
       total_vat_amount_oc: total_vat_amount,
-
       detail,
     };
 

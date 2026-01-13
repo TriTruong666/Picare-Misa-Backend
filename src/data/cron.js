@@ -211,7 +211,6 @@ async function misaCronInitData() {
     ]);
 
     console.log("Đồng bộ thành công:", {
-      customers: cus.total,
       products: product.total,
       stocks: stock.total,
     });
@@ -269,7 +268,7 @@ async function cronBuildDocumentMisa() {
           [Op.or]: ["pending", "stock", "invoice"],
         },
         carrierStatus: {
-          [Op.or]: ["delivered", "delivering"],
+          [Op.or]: ["delivered"],
         },
         realCarrierStatus: "success",
         cancelledStatus: "uncancelled",

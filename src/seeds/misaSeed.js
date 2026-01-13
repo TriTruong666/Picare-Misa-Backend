@@ -7,14 +7,14 @@ async function misaSeed() {
     console.error("Misa access token not found");
   }
 
-  console.log("=== BẮT ĐẦU SYNC TẤT CẢ DỮ LIỆU MISA ===");
+  console.log("=== BẮT ĐẦU KHỞI TẠO DỮ LIỆU MISA ===");
 
   await Promise.all([
     syncDataMisa(config.accessToken, 2),
     syncDataMisa(config.accessToken, 3),
   ]);
 
-  console.log("=== KẾT THÚC SYNC MISA ===");
+  console.log("=== KẾT THÚC KHỞI TẠO DỮ LIỆU MISA ===");
 }
 
 module.exports = misaSeed;

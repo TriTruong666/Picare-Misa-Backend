@@ -5,13 +5,30 @@ const {
   AttendanceController,
 } = require("../controllers/attendance.controller");
 
-router.get("/employee", AttendanceController.getAttendanceEmployeeData);
+router.get(
+  "/employee",
+  authMiddleware,
+  AttendanceController.getAttendanceEmployeeData
+);
 router.get(
   "/by-server/",
+  authMiddleware,
   AttendanceController.getAttendanceEmployeeDataByServer
 );
-router.get("/server", AttendanceController.getAllAttendanceServer);
-router.post("/sync", AttendanceController.syncAttendanceData);
-router.post("/sync-google-sheet", AttendanceController.syncGoogleSheet);
-router.post("/server", AttendanceController.createAttendanceServer);
+router.get(
+  "/server",
+  authMiddleware,
+  AttendanceController.getAllAttendanceServer
+);
+router.post("/sync", authMiddleware, AttendanceController.syncAttendanceData);
+router.post(
+  "/sync-google-sheet",
+  authMiddleware,
+  AttendanceController.syncGoogleSheet
+);
+router.post(
+  "/server",
+  authMiddleware,
+  AttendanceController.createAttendanceServer
+);
 module.exports = router;

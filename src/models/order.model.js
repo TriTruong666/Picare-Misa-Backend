@@ -98,6 +98,15 @@ const Order = sequelize.define(
       validate: { isIn: [["invoice", "stock", "pending", "completed"]] },
       allowNull: true,
     },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    customerName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "customer_name",
+    },
     note: {
       type: DataTypes.TEXT,
     },
