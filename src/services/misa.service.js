@@ -27,15 +27,21 @@ async function connectAmisMisa() {
   }
 }
 
-async function postMisaDataService(accessToken, type = 1) {
+async function postMisaDataService(
+  accessToken,
+  type = 2,
+  skip = 0,
+  take = 1000
+) {
   const body = {
     data_type: type,
     branch_id: null,
-    skip: 0,
-    take: 1000,
+    skip: skip,
+    take: take,
     app_id: process.env.MISA_PICARE_APP_ID,
     last_sync_time: null,
   };
+
   try {
     const res = await axios.post(
       "https://actapp.misa.vn/apir/sync/actopen/get_dictionary",
@@ -46,37 +52,26 @@ async function postMisaDataService(accessToken, type = 1) {
         },
       }
     );
+
     return JSON.parse(res.data.Data);
   } catch (err) {
-    console.error(` Misa Error:`, err.message);
+    console.error(`Misa Error:`, err.message);
+    return null;
   }
 }
 
 const sourceCustomerMap = {
-  "Shopee Picare": "Shopee Picare",
-  "Shopee Easydew": "Shopee Easydew",
-  Lazada: "Lazada Picare",
-  Tiki: "Tiki Picare",
-  "Tiktok Shop": "Tiktok Picare",
+  "Shopee Picare": "08acf98f-080c-4c74-aa72-da16642c4f0f",
+  "Shopee Easydew": "76fda269-328d-4bc7-9755-0d01b05d8ccc",
+  "Lazada Picare": "984b48e2-5de1-4427-bffd-7098977ed124",
+  "Lazada Easydew": "50f1c0d5-8af2-4ba4-9865-cc272e235d65",
+  Tiki: "920fa0ab-d5fa-4216-9a92-7315adcd73c2",
+  "Tiktok Shop": "32f05ee1-d1b8-428a-905f-67914716f904",
 };
 
 async function getCustomerFromSource(orderSource) {
-  const accountObjectName = sourceCustomerMap[orderSource];
-  if (!accountObjectName) {
-    throw new Error(`Không tìm thấy mapping cho source: ${orderSource}`);
-  }
-
-  const customer = await MisaCustomer.findOne({
-    where: { account_object_name: accountObjectName },
-  });
-
-  if (!customer) {
-    throw new Error(
-      `Không tìm thấy customer trong Misa với tên: ${accountObjectName}`
-    );
-  }
-
-  return customer;
+  const accountMappingId = sourceCustomerMap[orderSource];
+  return accountMappingId;
 }
 
 async function postSaleDocumentMisaService(accessToken, { orderId }) {
@@ -98,7 +93,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
     const stock = await MisaStock.findOne({
       where: { stock_code: "KHO_CHAN_HUNG" },
     });
-    const customer = await getCustomerFromSource(order.source);
+    const accOjbId = await getCustomerFromSource(order.source);
 
     if (!stock || !customer)
       throw new Error("Thiếu thông tin stock hoặc customer");
@@ -140,7 +135,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           unit_id: misaProduct.unit_id,
           unit_name: misaProduct.unit_name,
 
-          account_object_id: customer.account_object_id,
+          account_object_id: accOjbId,
           sort_order: index + 1,
 
           quantity: item.qty,

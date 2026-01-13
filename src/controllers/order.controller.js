@@ -343,12 +343,28 @@ function getSourceFromHaravanOrder(hvOrder) {
         source = "Shopee Easydew";
       }
     }
+  } else if (
+    hvOrder.note_attributes &&
+    hvOrder.source === "lazada" &&
+    Array.isArray(hvOrder.note_attributes)
+  ) {
+    const branchAttr = hvOrder.note_attributes.find(
+      (attr) => attr.name === "X-Haravan-SalesChannel-BranchName"
+    );
+
+    if (branchAttr && branchAttr.value) {
+      const branchName = branchAttr.value;
+
+      if (branchName.includes("Picare Việt Nam")) {
+        source = "Lazada Picare";
+      } else if (branchName.includes("Easydew Việt Nam")) {
+        source = "Lazada Easydew";
+      }
+    }
   } else if (hvOrder.source === "tiktokshop") {
     source = "Tiktok Shop";
   } else if (hvOrder.source === "tiki") {
     source = "Tiki";
-  } else if (hvOrder.source === "lazada") {
-    source = "Lazada";
   } else if (hvOrder.source === "web") {
     source = "Website";
   } else if (hvOrder.source === "zalo") {

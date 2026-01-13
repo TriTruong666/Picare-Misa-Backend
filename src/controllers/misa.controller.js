@@ -58,7 +58,6 @@ class MisaController {
       console.log("=== BẮT ĐẦU SYNC TẤT CẢ DỮ LIỆU MISA ===");
 
       await Promise.all([
-        syncDataMisa(config.accessToken, 1),
         syncDataMisa(config.accessToken, 2),
         syncDataMisa(config.accessToken, 3),
       ]);
@@ -201,25 +200,6 @@ async function initialMisaConnection() {
 async function syncDataMisa(access_token, type) {
   const data = await postMisaDataService(access_token, type);
 
-  console.log("=== BẮT ĐẦU SYNC MISA ===");
-  console.log("Type:", type);
-  console.log("Số lượng dữ liệu lấy về từ MISA:", data.length);
-
-  if (type === 1) {
-    for (const misaItem of data) {
-      await MisaCustomer.upsert({
-        account_object_id: misaItem.account_object_id,
-        account_object_code: misaItem.account_object_code,
-        account_object_name: misaItem.account_object_name,
-        account_object_group_id_list: misaItem.account_object_group_id_list,
-        account_object_group_code_list: misaItem.account_object_group_code_list,
-        account_object_group_name_list: misaItem.account_object_group_name_list,
-        address: misaItem.address,
-      });
-    }
-    console.log("Đã UPSERT xong khách hàng vào DB");
-  }
-
   if (type === 2) {
     for (const misaItem of data) {
       await MisaProduct.upsert({
@@ -245,8 +225,6 @@ async function syncDataMisa(access_token, type) {
     }
     console.log("Đã UPSERT xong kho vào DB");
   }
-
-  console.log("=== KẾT THÚC SYNC MISA ===");
 
   return {
     message: `Đồng bộ ${data.length} bản ghi thành công`,

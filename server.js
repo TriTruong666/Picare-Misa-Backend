@@ -14,6 +14,8 @@ const attendanceRoutes = require("./src/routes/attendance.route");
 const activityLogRoutes = require("./src/routes/activity_log.route");
 const { sseHandler } = require("./src/config/sse");
 const seedingUsers = require("./src/seeds/userSeed");
+const { initialMisaConnection } = require("./src/controllers/misa.controller");
+const misaSeed = require("./src/seeds/misaSeed");
 
 const app = express();
 
@@ -47,6 +49,8 @@ app.use("/api/misa", misaRoutes);
     console.log("Tất cả Models đã được đồng bộ hoá");
 
     await seedingUsers();
+    await initialMisaConnection();
+    await misaSeed();
 
     const PORT = process.env.SERVER_PORT || 8686;
     app.listen(PORT, () => {

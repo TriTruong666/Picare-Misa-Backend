@@ -206,7 +206,6 @@ async function misaCronInitData() {
     const accessToken = config.accessToken;
 
     const [cus, product, stock] = await Promise.all([
-      syncDataMisa(accessToken, 1),
       syncDataMisa(accessToken, 2),
       syncDataMisa(accessToken, 3),
     ]);

@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const { MisaController } = require("../controllers/misa.controller");
-const { authorizeRoles, authMiddleware } = require("../middlewares/middleware");
 
 router.get("/stock", MisaController.getMisaStock);
 router.get("/customer", MisaController.getMisaAccount);
