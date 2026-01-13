@@ -95,8 +95,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
     });
     const accOjbId = await getCustomerFromSource(order.source);
 
-    if (!stock || !customer)
-      throw new Error("Thiếu thông tin stock hoặc customer");
+    if (!stock) throw new Error("Thiếu thông tin stock hoặc customer");
 
     const refId = crypto.randomUUID();
     const refDetailId = crypto.randomUUID();

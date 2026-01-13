@@ -14,3 +14,7 @@
 # JSON File
 user_seed.json
 account-service.json
+
+# Docker
+docker-compose.yml
+Dockerfile
