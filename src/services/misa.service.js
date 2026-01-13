@@ -221,7 +221,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
       due_day: 15,
       is_calculated_cost: false,
       exchange_rate: 1,
-      journal_memo: `${order.orderId} - ${order.customerName} ${
+      journal_memo: `${order.source} - ${order.orderId} ${
         order.totalDiscountPrice > 0 ? "- CoCK" : ""
       } `,
       shipping_address: order.address,
