@@ -257,7 +257,7 @@ function delay(ms) {
 
 async function cronBuildDocumentMisa() {
   try {
-    const startOfDay = dayjs().subtract(3, "day").startOf("day").toDate();
+    const startOfDay = dayjs().subtract(8, "day").startOf("day").toDate();
     const endOfDay = dayjs().endOf("day").toDate();
     let successCount = 0;
     let failedCount = 0;
@@ -327,7 +327,7 @@ async function cronBuildDocumentMisa() {
         });
         console.error(`Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
       }
-      await delay(500);
+      await delay(100);
     }
     console.log(
       `Hoàn tất lập chứng từ: ${successCount} đơn thành công, ${failedCount} đơn lỗi.`

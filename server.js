@@ -45,7 +45,7 @@ app.use("/api/misa", misaRoutes);
     await sequelize.authenticate();
     console.log("Đã kết nối với SQL Server thông qua Sequelize");
 
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
     console.log("Tất cả Models đã được đồng bộ hoá");
 
     await seedingUsers();
@@ -54,7 +54,7 @@ app.use("/api/misa", misaRoutes);
 
     const PORT = process.env.SERVER_PORT || 8686;
     app.listen(PORT, () => {
-      console.log(` Server đang khởi chạy tại cổng ${PORT}`);
+      console.log(`Server Picare đang khởi chạy tại cổng ${PORT}`);
     });
   } catch (err) {
     console.error("Không thể kết nối tới DB:", err);
