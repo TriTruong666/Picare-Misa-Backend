@@ -24,7 +24,7 @@ async function seedingUsers() {
       }
     }
   } catch (error) {
-    console.error(" Lỗi khi seed users:", error.message);
+    console.error("Lỗi khi seed users:", error.message);
   }
 }
 
