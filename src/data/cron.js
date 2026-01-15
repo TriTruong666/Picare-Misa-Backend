@@ -20,8 +20,8 @@ const ActivityLog = require("../models/activity_log.model");
 const AttendanceUser = require("../models/attendance_user.model");
 
 cron.schedule("28,58 * * * *", async () => cronSyncHaravanOrder());
-cron.schedule("*/15 * * * *", async () => cronSyncAttendance());
-cron.schedule("*/10 * * * *", async () => cronDeleteAttendanceLogs());
+// cron.schedule("*/15 * * * *", async () => cronSyncAttendance());
+// cron.schedule("*/10 * * * *", async () => cronDeleteAttendanceLogs());
 cron.schedule("0,30 * * * *", async () => cronBuildDocumentMisa());
 cron.schedule("29,59 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
