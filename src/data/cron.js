@@ -257,10 +257,11 @@ function delay(ms) {
 
 async function cronBuildDocumentMisa() {
   try {
-    const startOfDay = dayjs().subtract(8, "day").startOf("day").toDate();
+    const startOfDay = dayjs().subtract(3, "day").startOf("day").toDate();
     const endOfDay = dayjs().endOf("day").toDate();
     let successCount = 0;
     let failedCount = 0;
+    let doneCount = 0;
 
     const stockOrders = await Order.findAll({
       where: {
@@ -291,12 +292,22 @@ async function cronBuildDocumentMisa() {
 
     for (const order of stockOrders) {
       try {
+        const doneOrder = await EbizMisaDone.findOne({
+          where: { orderId: order.orderId },
+        });
+        if (doneOrder) {
+          console.log("Đơn này đã xin chứng từ rồi");
+          doneCount++;
+          continue;
+        }
+
         const { refId, refDetailId } = await postSaleDocumentMisaService(
           config.accessToken,
           {
             orderId: order.orderId,
           }
         );
+
         await EbizMisaDone.upsert({
           orderId: order.orderId,
           haravanId: order.haravanId,
@@ -330,7 +341,7 @@ async function cronBuildDocumentMisa() {
       await delay(100);
     }
     console.log(
-      `Hoàn tất lập chứng từ: ${successCount} đơn thành công, ${failedCount} đơn lỗi.`
+      `Hoàn tất lập chứng từ: ${successCount} đơn thành công, ${failedCount} đơn lỗi, ${doneCount} đã lập`
     );
   } catch (error) {
     console.error(`Lỗi tự động Misa:`, error);
