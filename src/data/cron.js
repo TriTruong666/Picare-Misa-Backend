@@ -325,6 +325,8 @@ async function cronBuildDocumentMisa() {
           note: order.note,
           refId,
           refDetailId,
+          address: order.address,
+          customerName: order.customerName,
         });
         await order.update({ status: "completed" });
         successCount++;

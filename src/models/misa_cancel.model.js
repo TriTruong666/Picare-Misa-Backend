@@ -106,6 +106,15 @@ const EbizMisaCancel = sequelize.define(
     note: {
       type: DataTypes.TEXT,
     },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    customerName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "customer_name",
+    },
   },
   {
     timestamps: false,
