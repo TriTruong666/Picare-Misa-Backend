@@ -1,6 +1,5 @@
 const axios = require("axios");
 const Order = require("../models/order.model");
-const MisaCustomer = require("../models/misa_customer.model");
 const MisaStock = require("../models/misa_stock.model");
 const MisaProduct = require("../models/misa_product.model");
 const OrderDetail = require("../models/order_detail.model");
@@ -109,11 +108,10 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
     const refId = crypto.randomUUID();
     const refDetailId = crypto.randomUUID();
-    const giagiam=order.totalDiscountPrice;
-    const Tongdon=order.totalPrice;
+    const giagiam = order.totalDiscountPrice;
+    const tongdon = order.totalPrice;
+    const discountRatio = tongdon > 0 ? giagiam / tongdon : 0;
     const detail = await Promise.all(
-      
-      
       order.line_items.map(async (item, index) => {
         const misaProduct = await MisaProduct.findOne({
           where: { inventory_item_code: item.sku },
@@ -124,11 +122,16 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
         }
 
         const taxRate = misaProduct.tax_rate || 0;
-        const priceAfterTax = item.price-(giagiam > 0 ? (giagiam/Tongdon*item.price) : 0);
-        const priceBeforeTax = taxRate
-          ? priceAfterTax / (1 + taxRate / 100)
-          : priceAfterTax;
-        const vatAmount = priceAfterTax - priceBeforeTax;
+
+        const round = (n) => Math.round(n * 100) / 100;
+
+        const priceBeforeTax = round(item.price - discountRatio * item.price);
+
+        const priceAfterTax = taxRate
+          ? round(priceBeforeTax / (1 + taxRate / 100))
+          : priceBeforeTax;
+
+        const vatAmount = round(priceBeforeTax - priceAfterTax);
 
         return {
           ref_detail_id: refDetailId,
@@ -144,8 +147,8 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           stock_code: stock.stock_code,
           stock_name: stock.stock_name,
 
-          unit_id: misaProduct.unit_id,
-          unit_name: misaProduct.unit_name,
+          unit_id: misaProduct.unit_id || "Không",
+          unit_name: misaProduct.unit_name || "Không",
 
           account_object_id: accountMappingId,
           sort_order: index + 1,
@@ -155,8 +158,8 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           amount_oc: priceBeforeTax * item.qty,
 
           discount_rate: null,
-         // discount_amount: index === 0 ? order.totalDiscountPrice || 0 : 0,
-         // discount_amount_oc: index === 0 ? order.totalDiscountPrice || 0 : 0,
+          // discount_amount: index === 0 ? order.totalDiscountPrice || 0 : 0,
+          // discount_amount_oc: index === 0 ? order.totalDiscountPrice || 0 : 0,
 
           main_quantity: item.qty,
           main_convert_rate: null,
@@ -171,7 +174,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           description: item.productName,
 
           exchange_rate_operator: "*",
-          unit_price: priceBeforeTax,
+          unit_price: priceAfterTax,
 
           is_promotion: false,
           is_unit_price_after_tax: false,
@@ -238,7 +241,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
       excel_row_index: 0,
       is_valid: false,
       reftype: 3520,
-      receiver:order.customerName,
+      receiver: order.customerName,
       auto_refno: true,
       state: 0,
 

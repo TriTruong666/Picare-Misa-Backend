@@ -19,11 +19,11 @@ const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
 const AttendanceUser = require("../models/attendance_user.model");
 
-cron.schedule("26,40 * * * *", async () => cronSyncHaravanOrder());
+// cron.schedule("*/30 * * * *", async () => cronSyncHaravanOrder());
 // cron.schedule("*/15 * * * *", async () => cronSyncAttendance());
 // cron.schedule("*/10 * * * *", async () => cronDeleteAttendanceLogs());
-cron.schedule("*/4 * * * *", async () => cronBuildDocumentMisa());
-cron.schedule("*/3 * * * *", async () => cronMoveCancelledOrders());
+// cron.schedule("*/3 * * * *", async () => cronBuildDocumentMisa());
+// cron.schedule("*/2 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
   sendSse({
     status: "health",
@@ -296,7 +296,6 @@ async function cronBuildDocumentMisa() {
           where: { orderId: order.orderId },
         });
         if (doneOrder) {
-          console.log("Đơn này đã xin chứng từ rồi");
           doneCount++;
           continue;
         }
@@ -340,10 +339,10 @@ async function cronBuildDocumentMisa() {
         });
         console.error(`Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
       }
-      await delay(100);
+      await delay(600);
     }
     console.log(
-      `Hoàn tất lập chứng từ: ${successCount} đơn thành công, ${failedCount} đơn lỗi, ${doneCount} đã lập`
+      `Hoàn tất lập chứng từ: ${successCount} đơn thành công, ${failedCount} đơn lỗi, ${doneCount} đơn đã bị duplicate`
     );
   } catch (error) {
     console.error(`Lỗi tự động Misa:`, error);
