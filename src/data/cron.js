@@ -19,11 +19,11 @@ const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
 const AttendanceUser = require("../models/attendance_user.model");
 
-cron.schedule("28,58 * * * *", async () => cronSyncHaravanOrder());
+cron.schedule("26,40 * * * *", async () => cronSyncHaravanOrder());
 // cron.schedule("*/15 * * * *", async () => cronSyncAttendance());
 // cron.schedule("*/10 * * * *", async () => cronDeleteAttendanceLogs());
-cron.schedule("0,30 * * * *", async () => cronBuildDocumentMisa());
-cron.schedule("29,59 * * * *", async () => cronMoveCancelledOrders());
+cron.schedule("*/4 * * * *", async () => cronBuildDocumentMisa());
+cron.schedule("*/3 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
   sendSse({
     status: "health",
@@ -257,7 +257,7 @@ function delay(ms) {
 
 async function cronBuildDocumentMisa() {
   try {
-    const startOfDay = dayjs().subtract(3, "day").startOf("day").toDate();
+    const startOfDay = dayjs().subtract(9, "day").startOf("day").toDate();
     const endOfDay = dayjs().endOf("day").toDate();
     let successCount = 0;
     let failedCount = 0;

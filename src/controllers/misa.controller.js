@@ -204,12 +204,23 @@ async function syncDataMisa(access_token, type) {
 
   if (type === 2) {
     for (const misaItem of data) {
+      let unitName = '';
+       if (!misaItem.unit_name) {
+          const unitList = JSON.parse(misaItem.unit_list);
+          // Lấy unit_name của phần tử đầu tiên trong mảng
+          if (unitList && unitList.length > 0) {
+            unitName = unitList[0].unit_name;
+          }
+        }
+        else{
+          unitName = misaItem.unit_name
+        }
       await MisaProduct.upsert({
         inventory_item_id: misaItem.inventory_item_id,
         inventory_item_code: misaItem.inventory_item_code,
         inventory_item_name: misaItem.inventory_item_name,
         unit_id: misaItem.unit_id,
-        unit_name: misaItem.unit_name,
+        unit_name: unitName,
         tax_rate: parseInt(misaItem.tax_rate) || 0,
       });
     }
@@ -230,7 +241,7 @@ async function syncDataMisa(access_token, type) {
 
   return {
     message: `Đồng bộ ${data.length} bản ghi thành công`,
-    total: data.length,
+    data
   };
 }
 

@@ -19,7 +19,8 @@ class OrderController {
         source,
         cancelledStatus,
         orderId,
-      } = req.query;
+        //subtotal_price,
+       } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
       const where = {};
