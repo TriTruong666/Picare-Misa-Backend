@@ -32,6 +32,7 @@ const OrderDetail = sequelize.define(
       allowNull: false,
       field: "product_name",
     },
+ 
   },
   {
     timestamps: false,

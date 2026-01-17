@@ -19,6 +19,7 @@ class OrderController {
         source,
         cancelledStatus,
         orderId,
+        //subtotal_price,
       } = req.query;
       const offset = (Number(page) - 1) * Number(limit);
 
@@ -269,7 +270,7 @@ async function runSyncHaravanOrders() {
             ? "fast"
             : "normal",
         cancelledStatus: hvOrder.cancelled_status,
-        totalPrice: parseFloat(hvOrder.total_price),
+        totalPrice: parseFloat(hvOrder.subtotal_price),
         totalLineItemPrice: parseFloat(hvOrder.total_line_items_price),
         totalDiscountPrice: parseFloat(hvOrder.total_discounts),
         trackingNumber: hvOrder.fulfillments?.[0]?.tracking_number || null,

@@ -199,17 +199,36 @@ async function initialMisaConnection() {
   return { message: "Kết nối thành công tới Misa Amis" };
 }
 
+const safeJsonParse = (value, fallback = null) => {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+};
+
 async function syncDataMisa(access_token, type) {
   const data = await postMisaDataService(access_token, type);
 
   if (type === 2) {
     for (const misaItem of data) {
+      let unitName = "";
+
+      if (!misaItem.unit_name) {
+        const unitList = safeJsonParse(misaItem.unit_list, []);
+        if (unitList.length > 0) {
+          unitName = unitList[0].unit_name || "";
+        }
+      } else {
+        unitName = misaItem.unit_name;
+      }
+
       await MisaProduct.upsert({
         inventory_item_id: misaItem.inventory_item_id,
         inventory_item_code: misaItem.inventory_item_code,
         inventory_item_name: misaItem.inventory_item_name,
         unit_id: misaItem.unit_id,
-        unit_name: misaItem.unit_name,
+        unit_name: unitName,
         tax_rate: parseInt(misaItem.tax_rate) || 0,
       });
     }
@@ -230,7 +249,7 @@ async function syncDataMisa(access_token, type) {
 
   return {
     message: `Đồng bộ ${data.length} bản ghi thành công`,
-    total: data.length,
+    data,
   };
 }
 

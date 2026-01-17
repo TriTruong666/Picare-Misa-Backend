@@ -10,7 +10,6 @@ const {
   initialMisaConnection,
   syncDataMisa,
 } = require("../controllers/misa.controller");
-const { postSaleDocumentMisaService } = require("../services/misa.service");
 const MisaConfig = require("../models/misa_config.model");
 const Order = require("../models/order.model");
 const EbizMisaDone = require("../models/misa_done.model");
@@ -19,27 +18,25 @@ const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
 const AttendanceUser = require("../models/attendance_user.model");
 
-cron.schedule("28,58 * * * *", async () => cronSyncHaravanOrder());
-// cron.schedule("*/15 * * * *", async () => cronSyncAttendance());
-// cron.schedule("*/10 * * * *", async () => cronDeleteAttendanceLogs());
-cron.schedule("0,30 * * * *", async () => cronBuildDocumentMisa());
-cron.schedule("29,59 * * * *", async () => cronMoveCancelledOrders());
-cron.schedule("*/30 * * * * *", () => {
-  sendSse({
-    status: "health",
-    message: "Server Online",
-  });
-});
-cron.schedule("0,20,40 * * * *", async () => misaCronInitData());
-cron.schedule("27,57 * * * *", () => {
-  sendSse({
-    status: "warning",
-    message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
-    type: "notification",
-  });
-});
-cron.schedule("0 0 * * *", async () => cronDeleteOrder());
-cron.schedule("0 0 * * *", async () => cronDeleteActivityLogs());
+// cron.schedule("*/30 * * * *", async () => cronSyncHaravanOrder());
+// cron.schedule("*/3 * * * *", async () => cronBuildDocumentMisa());
+// cron.schedule("*/2 * * * *", async () => cronMoveCancelledOrders());
+// cron.schedule("*/30 * * * * *", () => {
+//   sendSse({
+//     status: "health",
+//     message: "Server Online",
+//   });
+// });
+// cron.schedule("0,20,40 * * * *", async () => misaCronInitData());
+// cron.schedule("27,57 * * * *", () => {
+//   sendSse({
+//     status: "warning",
+//     message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
+//     type: "notification",
+//   });
+// });
+// cron.schedule("0 0 * * *", async () => cronDeleteOrder());
+// cron.schedule("0 0 * * *", async () => cronDeleteActivityLogs());
 
 async function cronDeleteAttendanceLogs() {
   try {
@@ -253,99 +250,4 @@ async function cronSyncAttendance() {
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function cronBuildDocumentMisa() {
-  try {
-    const startOfDay = dayjs().subtract(3, "day").startOf("day").toDate();
-    const endOfDay = dayjs().endOf("day").toDate();
-    let successCount = 0;
-    let failedCount = 0;
-    let doneCount = 0;
-
-    const stockOrders = await Order.findAll({
-      where: {
-        status: {
-          [Op.or]: ["pending", "stock", "invoice"],
-        },
-        carrierStatus: {
-          [Op.or]: ["delivered"],
-        },
-        realCarrierStatus: "success",
-        cancelledStatus: "uncancelled",
-        saleDate: {
-          [Op.between]: [startOfDay, endOfDay],
-        },
-      },
-      order: [["saleDate", "ASC"]],
-    });
-
-    const config = await MisaConfig.findByPk(1);
-    if (!config || !config.accessToken) {
-      await initialMisaConnection();
-    }
-
-    if (stockOrders.length === 0) {
-      console.log("Xin chứng từ tự động dùng lại, hết đơn để xử lý");
-      return;
-    }
-
-    for (const order of stockOrders) {
-      try {
-        const doneOrder = await EbizMisaDone.findOne({
-          where: { orderId: order.orderId },
-        });
-        if (doneOrder) {
-          console.log("Đơn này đã xin chứng từ rồi");
-          doneCount++;
-          continue;
-        }
-
-        const { refId, refDetailId } = await postSaleDocumentMisaService(
-          config.accessToken,
-          {
-            orderId: order.orderId,
-          }
-        );
-
-        await EbizMisaDone.upsert({
-          orderId: order.orderId,
-          haravanId: order.haravanId,
-          saleDate: order.saleDate,
-          financialStatus: order.financialStatus,
-          carrierStatus: order.carrierStatus,
-          realCarrierStatus: order.realCarrierStatus,
-          totalPrice: order.totalPrice,
-          totalLineItemPrice: order.totalLineItemPrice,
-          totalDiscountPrice: order.totalDiscountPrice,
-          cancelledStatus: order.cancelledStatus,
-          trackingNumber: order.trackingNumber,
-          isSPXFast: order.isSPXFast,
-          source: order.source,
-          note: order.note,
-          refId,
-          refDetailId,
-          address: order.address,
-          customerName: order.customerName,
-        });
-        await order.update({ status: "completed" });
-        successCount++;
-        console.log(`Đã xin chứng từ đơn ${order.orderId}`);
-      } catch (error) {
-        failedCount++;
-        await ActivityLog.create({
-          name: "System",
-          type: "accounting",
-          note: `Lỗi xin chứng từ đơn ${order.orderId}: ${error.message}`,
-        });
-        console.error(`Lỗi xin chứng từ đơn ${order.orderId}:`, error.message);
-      }
-      await delay(100);
-    }
-    console.log(
-      `Hoàn tất lập chứng từ: ${successCount} đơn thành công, ${failedCount} đơn lỗi, ${doneCount} đã lập`
-    );
-  } catch (error) {
-    console.error(`Lỗi tự động Misa:`, error);
-  }
 }
