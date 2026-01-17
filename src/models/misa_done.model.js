@@ -10,15 +10,14 @@ const EbizMisaDone = sequelize.define(
       autoIncrement: true,
     },
     orderId: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true,
       field: "order_id",
     },
     haravanId: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
       field: "haravan_id",
     },
     saleDate: {
@@ -105,15 +104,6 @@ const EbizMisaDone = sequelize.define(
     },
     note: {
       type: DataTypes.TEXT,
-    },
-    address: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    customerName: {
-      type: DataTypes.STRING,
-      allowNull: true,
-      field: "customer_name",
     },
   },
   {

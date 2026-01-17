@@ -11,12 +11,12 @@ const OrderDetail = sequelize.define(
       autoIncrement: true,
     },
     orderId: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING,
       allowNull: false,
       field: "order_id",
     },
     sku: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING,
       allowNull: false,
     },
     price: {
@@ -32,7 +32,6 @@ const OrderDetail = sequelize.define(
       allowNull: false,
       field: "product_name",
     },
- 
   },
   {
     timestamps: false,

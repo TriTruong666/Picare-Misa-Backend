@@ -10,13 +10,13 @@ const Order = sequelize.define(
       autoIncrement: true,
     },
     orderId: {
-      type: DataTypes.STRING(100),
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true,
       field: "order_id",
     },
     haravanId: {
-      type: DataTypes.BIGINT,
+      type: DataTypes.STRING,
       allowNull: false,
       unique: true,
       field: "haravan_id",
