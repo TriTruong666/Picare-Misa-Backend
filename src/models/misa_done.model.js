@@ -23,7 +23,7 @@ const EbizMisaDone = sequelize.define(
     },
     saleDate: {
       type: DataTypes.DATE,
-      allowNull: false,
+      allowNull: true,
       field: "sale_date",
     },
     financialStatus: {
@@ -40,7 +40,7 @@ const EbizMisaDone = sequelize.define(
           ],
         ],
       },
-      allowNull: false,
+      allowNull: true,
       field: "financial_status",
     },
     carrierStatus: {
@@ -55,27 +55,27 @@ const EbizMisaDone = sequelize.define(
     },
     totalPrice: {
       type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
+      allowNull: true,
       field: "total_price",
     },
     totalLineItemPrice: {
       type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
+      allowNull: true,
       field: "total_line_item_price",
     },
     totalDiscountPrice: {
       type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
+      allowNull: true,
       field: "total_discount_price",
     },
     refId: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       field: "ref_id",
     },
     refDetailId: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       field: "ref_detail_id",
     },
     cancelledStatus: {
@@ -83,7 +83,7 @@ const EbizMisaDone = sequelize.define(
       validate: {
         isIn: [["cancelled", "uncancelled"]],
       },
-      allowNull: false,
+      allowNull: true,
       field: "cancelled_status",
     },
     trackingNumber: {
@@ -96,12 +96,12 @@ const EbizMisaDone = sequelize.define(
       validate: {
         isIn: [["normal", "fast"]],
       },
-      allowNull: false,
+      allowNull: true,
       field: "is_spx_fast",
     },
     source: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     note: {
       type: DataTypes.TEXT,
