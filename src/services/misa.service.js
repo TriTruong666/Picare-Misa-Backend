@@ -299,14 +299,6 @@ async function deleteMisaDataService() {
     throw err;
   }
 }
-const dayjs = require("dayjs");
-const Order = require("../models/order.model");
-const { Op } = require("sequelize");
-const MisaConfig = require("../models/misa_config.model");
-const { initialMisaConnection } = require("../controllers/misa.controller");
-const EbizMisaDone = require("../models/misa_done.model");
-const { postSaleDocumentMisaService } = require("../services/misa.service");
-const ActivityLog = require("../models/activity_log.model");
 
 async function cronBuildDocumentMisa() {
   try {
