@@ -18,25 +18,25 @@ const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
 const AttendanceUser = require("../models/attendance_user.model");
 
-// cron.schedule("*/25 * * * *", async () => cronSyncHaravanOrder());
-// cron.schedule("*/30 * * * *", async () => cronBuildDocumentMisa());
-// cron.schedule("*/29 * * * *", async () => cronMoveCancelledOrders());
-// cron.schedule("*/30 * * * * *", () => {
-//   sendSse({
-//     status: "health",
-//     message: "Server Online",
-//   });
-// });
-// cron.schedule("*/15 * * * *", async () => misaCronInitData());
-// cron.schedule("*/24 * * * *", () => {
-//   sendSse({
-//     status: "warning",
-//     message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
-//     type: "notification",
-//   });
-// });
-// cron.schedule("0 0 * * *", async () => cronDeleteOrder());
-// cron.schedule("0 0 * * *", async () => cronDeleteActivityLogs());
+cron.schedule("*/25 * * * *", async () => cronSyncHaravanOrder());
+cron.schedule("*/30 * * * *", async () => cronBuildDocumentMisa());
+cron.schedule("*/29 * * * *", async () => cronMoveCancelledOrders());
+cron.schedule("*/30 * * * * *", () => {
+  sendSse({
+    status: "health",
+    message: "Server Online",
+  });
+});
+cron.schedule("*/15 * * * *", async () => misaCronInitData());
+cron.schedule("*/24 * * * *", () => {
+  sendSse({
+    status: "warning",
+    message: "Hệ thống sẽ đồng bộ đơn Haravan trong vòng 1 phút nữa",
+    type: "notification",
+  });
+});
+cron.schedule("0 0 * * *", async () => cronDeleteOrder());
+cron.schedule("0 0 * * *", async () => cronDeleteActivityLogs());
 
 async function cronDeleteAttendanceLogs() {
   try {
