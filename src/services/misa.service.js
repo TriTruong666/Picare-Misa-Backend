@@ -109,7 +109,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
     const refId = crypto.randomUUID();
     const refDetailId = crypto.randomUUID();
     const giagiam = order.totalDiscountPrice;
-    const tongdon = order.totalPrice;
+    const tongdon = order.totalLineItemPrice;
     const discountRatio = tongdon > 0 ? giagiam / tongdon : 0;
     const detail = await Promise.all(
       order.line_items.map(async (item, index) => {
@@ -154,8 +154,8 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           sort_order: index + 1,
 
           quantity: item.qty,
-          amount: priceBeforeTax * item.qty,
-          amount_oc: priceBeforeTax * item.qty,
+          amount: priceAfterTax * item.qty,
+          amount_oc: priceAfterTax * item.qty,
 
           discount_rate: null,
           // discount_amount: index === 0 ? order.totalDiscountPrice || 0 : 0,
