@@ -140,7 +140,11 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
           inventory_item_id: misaProduct.inventory_item_id,
           inventory_item_code: misaProduct.inventory_item_code,
-          inventory_item_name: misaProduct.inventory_item_name,
+          inventory_item_name:
+            priceAfterTax === 0
+              ? misaProduct.inventory_item_name +
+                " (Hàng khuyến mãi không thu tiên)"
+              : misaProduct.inventory_item_name,
           inventory_item_type: 0,
 
           stock_id: stock.stock_id,
