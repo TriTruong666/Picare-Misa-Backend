@@ -63,7 +63,7 @@ const sourceCustomerAccountObjectIdMap = {
   "Shopee Easydew": "76fda269-328d-4bc7-9755-0d01b05d8ccc",
   "Lazada Picare": "984b48e2-5de1-4427-bffd-7098977ed124",
   "Lazada Easydew": "50f1c0d5-8af2-4ba4-9865-cc272e235d65",
-  Tiki: "920fa0ab-d5fa-4216-9a92-7315adcd73c2",
+  "Tiki": "920fa0ab-d5fa-4216-9a92-7315adcd73c2",
   "Tiktok Shop": "32f05ee1-d1b8-428a-905f-67914716f904",
 };
 
@@ -72,7 +72,7 @@ const sourceCustomerAccountObjectCodeMap = {
   "Shopee Easydew": "KHACHLE_SHOPEE EASYDEW",
   "Lazada Picare": "KHACHLE_LAZADA PICARE",
   "Lazada Easydew": "KHACHLE_LAZADA EASYDEW",
-  Tiki: "KHACHLE_TIKI PICARE",
+  "Tiki": "KHACHLE_TIKI PICARE",
   "Tiktok Shop": "KHACHLE_TIKTOK PICARE",
 };
 
