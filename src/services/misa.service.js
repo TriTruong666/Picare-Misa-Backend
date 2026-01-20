@@ -175,7 +175,10 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           vat_amount: vatAmount * item.qty,
           vat_amount_oc: vatAmount * item.qty,
 
-          description: item.productName,
+          description:  priceAfterTax === 0
+              ? misaProduct.inventory_item_name +
+                " (Hàng khuyến mãi không thu tiên)"
+              : misaProduct.inventory_item_name,
 
           exchange_rate_operator: "*",
           unit_price: priceAfterTax,
