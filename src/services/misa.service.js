@@ -143,7 +143,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           inventory_item_name:
             priceAfterTax === 0
               ? misaProduct.inventory_item_name +
-                " (Hàng khuyến mãi không thu tiên)"
+                " (Hàng khuyến mãi không thu tiền)"
               : misaProduct.inventory_item_name,
           inventory_item_type: 0,
 
@@ -177,7 +177,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
           description:  priceAfterTax === 0
               ? misaProduct.inventory_item_name +
-                " (Hàng khuyến mãi không thu tiên)"
+                " (Hàng khuyến mãi không thu tiền)"
               : misaProduct.inventory_item_name,
 
           exchange_rate_operator: "*",
