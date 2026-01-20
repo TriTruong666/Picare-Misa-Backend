@@ -360,7 +360,7 @@ function getSourceFromHaravanOrder(hvOrder) {
 
       if (branchName.includes("Picare Việt Nam")) {
         source = "Lazada Picare";
-      } else if (branchName.includes("Easydew Việt Nam")) {
+      } else if (branchName.includes("Easydew Professional")) {
         source = "Lazada Easydew";
       }
     }
