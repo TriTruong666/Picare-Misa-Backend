@@ -6,7 +6,7 @@ async function fetchWithRetry(url, retries = 3, delayMs = 2000) {
       return await axios.get(url, { timeout: 5000 });
     } catch (err) {
       if (i === retries) throw err;
-      console.warn(`Retry ${i}/${retries}...`);
+      console.warn(`Đang thử lại lần ${i}/${retries}...`);
       await new Promise((r) => setTimeout(r, delayMs));
     }
   }
