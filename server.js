@@ -16,6 +16,7 @@ const { sseHandler } = require("./src/config/sse");
 const seedingUsers = require("./src/seeds/userSeed");
 const { initialMisaConnection } = require("./src/controllers/misa.controller");
 const misaSeed = require("./src/seeds/misaSeed");
+const { syncComboFromWebhook } = require("./src/services/webhook.service");
 
 const app = express();
 
@@ -51,6 +52,7 @@ app.use("/api/misa", misaRoutes);
     await seedingUsers();
     await initialMisaConnection();
     await misaSeed();
+    await syncComboFromWebhook();
 
     const PORT = process.env.SERVER_PORT || 8686;
     app.listen(PORT, () => {

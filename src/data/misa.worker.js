@@ -6,6 +6,7 @@ const { initialMisaConnection } = require("../controllers/misa.controller");
 const EbizMisaDone = require("../models/misa_done.model");
 const { postSaleDocumentMisaService } = require("../services/misa.service");
 const ActivityLog = require("../models/activity_log.model");
+const { delay } = require("../utils/utils");
 
 async function cronBuildDocumentMisa() {
   try {

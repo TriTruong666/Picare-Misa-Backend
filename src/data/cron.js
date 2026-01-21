@@ -18,6 +18,7 @@ const EbizMisaCancel = require("../models/misa_cancel.model");
 const ActivityLog = require("../models/activity_log.model");
 const AttendanceUser = require("../models/attendance_user.model");
 const { postSaleDocumentMisaService } = require("../services/misa.service");
+const { delay } = require("../utils/utils");
 
 cron.schedule("*/25 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("*/30 * * * *", async () => cronBuildDocumentMisa());
@@ -341,8 +342,4 @@ async function cronSyncAttendance() {
   } catch (err) {
     console.error("Cron job error:", err.message || err);
   }
-}
-
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

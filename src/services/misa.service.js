@@ -3,6 +3,8 @@ const Order = require("../models/order.model");
 const MisaStock = require("../models/misa_stock.model");
 const MisaProduct = require("../models/misa_product.model");
 const OrderDetail = require("../models/order_detail.model");
+const MisaCombo = require("../models/misa_combo.model");
+const { parseComboSku } = require("../utils/utils");
 
 async function connectAmisMisa() {
   try {
@@ -63,7 +65,7 @@ const sourceCustomerAccountObjectIdMap = {
   "Shopee Easydew": "76fda269-328d-4bc7-9755-0d01b05d8ccc",
   "Lazada Picare": "984b48e2-5de1-4427-bffd-7098977ed124",
   "Lazada Easydew": "50f1c0d5-8af2-4ba4-9865-cc272e235d65",
-  "Tiki": "920fa0ab-d5fa-4216-9a92-7315adcd73c2",
+  Tiki: "920fa0ab-d5fa-4216-9a92-7315adcd73c2",
   "Tiktok Shop": "32f05ee1-d1b8-428a-905f-67914716f904",
 };
 
@@ -72,7 +74,7 @@ const sourceCustomerAccountObjectCodeMap = {
   "Shopee Easydew": "KHACHLE_SHOPEE EASYDEW",
   "Lazada Picare": "KHACHLE_LAZADA PICARE",
   "Lazada Easydew": "KHACHLE_LAZADA EASYDEW",
-  "Tiki": "KHACHLE_TIKI PICARE",
+  Tiki: "KHACHLE_TIKI PICARE",
   "Tiktok Shop": "KHACHLE_TIKTOK PICARE",
 };
 
@@ -113,12 +115,26 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
     const discountRatio = tongdon > 0 ? giagiam / tongdon : 0;
     const detail = await Promise.all(
       order.line_items.map(async (item, index) => {
+        const { isCombo, baseSku, multiplier } = parseComboSku(item.sku);
         const misaProduct = await MisaProduct.findOne({
-          where: { inventory_item_code: item.sku },
+          where: { inventory_item_code: baseSku },
         });
-
         if (!misaProduct) {
           throw new Error(`Không tìm thấy MisaProduct cho SKU: ${item.sku}`);
+        }
+
+        let finalQty = item.qty;
+
+        if (isCombo) {
+          const combo = await MisaCombo.findOne({
+            where: { inventoryItemCode: baseSku },
+          });
+
+          if (!combo) {
+            throw new Error(`Không tìm thấy combo cho SKU: ${baseSku}`);
+          }
+
+          finalQty = item.qty * combo.quantity * multiplier;
         }
 
         const taxRate = misaProduct.tax_rate || 0;
@@ -139,7 +155,9 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           org_refid: refId,
 
           inventory_item_id: misaProduct.inventory_item_id,
-          inventory_item_code: misaProduct.inventory_item_code,
+          inventory_item_code: isCombo
+            ? item.sku
+            : misaProduct.inventory_item_code,
           inventory_item_name:
             priceAfterTax === 0
               ? misaProduct.inventory_item_name +
@@ -157,25 +175,26 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           account_object_id: accountMappingId,
           sort_order: index + 1,
 
-          quantity: item.qty,
-          amount: priceAfterTax * item.qty,
-          amount_oc: priceAfterTax * item.qty,
+          quantity: finalQty,
+          amount: priceAfterTax * finalQty,
+          amount_oc: priceAfterTax * finalQty,
 
           discount_rate: null,
           // discount_amount: index === 0 ? order.totalDiscountPrice || 0 : 0,
           // discount_amount_oc: index === 0 ? order.totalDiscountPrice || 0 : 0,
 
-          main_quantity: item.qty,
+          main_quantity: finalQty,
           main_convert_rate: null,
           main_unit_id: misaProduct.unit_id,
           main_unit_name: misaProduct.unit_name,
           main_unit_price: priceBeforeTax,
 
           vat_rate: taxRate,
-          vat_amount: vatAmount * item.qty,
-          vat_amount_oc: vatAmount * item.qty,
+          vat_amount: vatAmount * finalQty,
+          vat_amount_oc: vatAmount * finalQty,
 
-          description:  priceAfterTax === 0
+          description:
+            priceAfterTax === 0
               ? misaProduct.inventory_item_name +
                 " (Hàng khuyến mãi không thu tiền)"
               : misaProduct.inventory_item_name,
