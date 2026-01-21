@@ -25,4 +25,10 @@ function parseComboSku(sku) {
   };
 }
 
-module.exports = { fetchWithRetry, delay, parseComboSku };
+function findNullFields(obj) {
+  return Object.entries(obj)
+    .filter(([_, v]) => v === null || v === undefined)
+    .map(([k]) => k);
+}
+
+module.exports = { fetchWithRetry, delay, parseComboSku, findNullFields };

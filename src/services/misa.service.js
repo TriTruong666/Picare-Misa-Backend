@@ -4,7 +4,7 @@ const MisaStock = require("../models/misa_stock.model");
 const MisaProduct = require("../models/misa_product.model");
 const OrderDetail = require("../models/order_detail.model");
 const MisaCombo = require("../models/misa_combo.model");
-const { parseComboSku } = require("../utils/utils");
+const { parseComboSku, findNullFields } = require("../utils/utils");
 
 async function connectAmisMisa() {
   try {
@@ -113,19 +113,179 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
     const giagiam = order.totalDiscountPrice;
     const tongdon = order.totalLineItemPrice;
     const discountRatio = tongdon > 0 ? giagiam / tongdon : 0;
-    const detail = await Promise.all(
-      order.line_items.map(async (item, index) => {
-        const { isCombo, baseSku, multiplier } = parseComboSku(item.sku);
-        const misaProduct = await MisaProduct.findOne({
-          where: { inventory_item_code: baseSku },
-        });
-        if (!misaProduct) {
-          throw new Error(`Không tìm thấy MisaProduct cho SKU: ${item.sku}`);
-        }
+    // const detail = await Promise.all(
+    //   order.line_items.map(async (item, index) => {
+    //     const { isCombo, baseSku, multiplier } = parseComboSku(item.sku);
 
-        let finalQty = item.qty;
+    //     const misaProduct = await MisaProduct.findOne({
+    //       where: { inventory_item_code: baseSku },
+    //     });
 
-        if (isCombo) {
+    //     if (!misaProduct) {
+    //       throw new Error(`Không tìm thấy MisaProduct cho SKU gốc: ${baseSku}`);
+    //     }
+
+    //     let finalQty = item.qty;
+
+    //     if (isCombo) {
+    //       const combo = await MisaCombo.findOne({
+    //         where: { inventoryItemCode: baseSku },
+    //       });
+
+    //       if (!combo) {
+    //         throw new Error(`Không tìm thấy combo cho SKU: ${baseSku}`);
+    //       }
+
+    //       finalQty = item.qty * combo.quantity * multiplier;
+    //     }
+
+    //     const taxRate = misaProduct.tax_rate || 0;
+    //     const round = (n) => Math.round(n * 100) / 100;
+
+    //     const priceBeforeTax = round(item.price - discountRatio * item.price);
+    //     const priceAfterTax = taxRate
+    //       ? round(priceBeforeTax / (1 + taxRate / 100))
+    //       : priceBeforeTax;
+
+    //     const vatAmount = round(priceBeforeTax - priceAfterTax);
+
+    //     return {
+    //       ref_detail_id: crypto.randomUUID(),
+    //       refid: refId,
+    //       org_refid: refId,
+
+    //       inventory_item_id: misaProduct.inventory_item_id,
+    //       inventory_item_code: isCombo
+    //         ? item.sku
+    //         : misaProduct.inventory_item_code,
+    //       inventory_item_name:
+    //         priceAfterTax === 0
+    //           ? misaProduct.inventory_item_name +
+    //             " (Hàng khuyến mãi không thu tiền)"
+    //           : misaProduct.inventory_item_name,
+    //       inventory_item_type: 0,
+
+    //       stock_id: stock.stock_id,
+    //       stock_code: stock.stock_code,
+    //       stock_name: stock.stock_name,
+
+    //       unit_id: misaProduct.unit_id || "Không",
+    //       unit_name: misaProduct.unit_name || "Không",
+
+    //       account_object_id: accountMappingId,
+    //       sort_order: index + 1,
+
+    //       quantity: finalQty,
+    //       amount: priceAfterTax * finalQty,
+    //       amount_oc: priceAfterTax * finalQty,
+
+    //       discount_rate: null,
+    //       // discount_amount: index === 0 ? order.totalDiscountPrice || 0 : 0,
+    //       // discount_amount_oc: index === 0 ? order.totalDiscountPrice || 0 : 0,
+
+    //       main_quantity: finalQty,
+    //       main_convert_rate: null,
+    //       main_unit_id: misaProduct.unit_id,
+    //       main_unit_name: misaProduct.unit_name,
+    //       main_unit_price: priceBeforeTax,
+
+    //       vat_rate: taxRate,
+    //       vat_amount: vatAmount * finalQty,
+    //       vat_amount_oc: vatAmount * finalQty,
+
+    //       description:
+    //         priceAfterTax === 0
+    //           ? misaProduct.inventory_item_name +
+    //             " (Hàng khuyến mãi không thu tiền)"
+    //           : misaProduct.inventory_item_name,
+
+    //       exchange_rate_operator: "*",
+    //       unit_price: priceAfterTax,
+
+    //       is_promotion: false,
+    //       is_unit_price_after_tax: false,
+
+    //       quantity_delivered: 0,
+    //       quantity_remain: 0,
+    //       is_description: false,
+
+    //       discount_type: 1,
+    //       discount_rate_voucher: 0,
+    //       state: 1,
+
+    //       status: 0,
+    //     };
+    //   })
+    // );
+
+    const detail = (
+      await Promise.all(
+        order.line_items.flatMap(async (item, index) => {
+          const { isCombo, baseSku, multiplier } = parseComboSku(item.sku);
+          const round = (n) => Math.round(n * 100) / 100;
+
+          // ======================
+          // HÀNG THƯỜNG
+          // ======================
+          if (!isCombo) {
+            const product = await MisaProduct.findOne({
+              where: { inventory_item_code: baseSku },
+            });
+
+            if (!product) {
+              throw new Error(`Không tìm thấy MisaProduct: ${baseSku}`);
+            }
+
+            const taxRate = product.tax_rate ?? 0;
+            const priceBeforeTax = round(
+              item.price - discountRatio * item.price
+            );
+            const priceAfterTax = taxRate
+              ? round(priceBeforeTax / (1 + taxRate / 100))
+              : priceBeforeTax;
+            const vatAmount = round(priceBeforeTax - priceAfterTax);
+
+            return [
+              buildBaseDetail({
+                refId,
+                misaProduct: product,
+                stock,
+                accountMappingId,
+                sortOrder: index * 10 + 1,
+                quantity: item.qty,
+                amount: priceAfterTax * item.qty,
+                priceBeforeTax,
+                priceAfterTax,
+                vatRate: taxRate,
+                vatAmount: vatAmount * item.qty,
+                inventoryItemCode: product.inventory_item_code,
+                inventoryItemName:
+                  priceAfterTax === 0
+                    ? product.inventory_item_name +
+                      " (Hàng khuyến mãi không thu tiền)"
+                    : product.inventory_item_name,
+                isDescription: false,
+              }),
+            ];
+          }
+
+          // ======================
+          // COMBO
+          // ======================
+          const parentProduct = await MisaProduct.findOne({
+            where: { inventory_item_code: item.sku }, // ELL009-5
+          });
+
+          const childProduct = await MisaProduct.findOne({
+            where: { inventory_item_code: baseSku }, // ELL009
+          });
+
+          if (!parentProduct || !childProduct) {
+            throw new Error(
+              `Thiếu product combo/con: ${item.sku} / ${baseSku}`
+            );
+          }
+
           const combo = await MisaCombo.findOne({
             where: { inventoryItemCode: baseSku },
           });
@@ -134,89 +294,77 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             throw new Error(`Không tìm thấy combo cho SKU: ${baseSku}`);
           }
 
-          finalQty = item.qty * combo.quantity * multiplier;
-        }
+          const realQty = item.qty * multiplier;
 
-        const taxRate = misaProduct.tax_rate || 0;
+          const taxRate = childProduct.tax_rate ?? 0;
 
-        const round = (n) => Math.round(n * 100) / 100;
+          const priceBeforeTax = round(item.price - discountRatio * item.price);
+          const priceAfterTax = taxRate
+            ? round(priceBeforeTax / (1 + taxRate / 100))
+            : priceBeforeTax;
+          const vatAmount = round(priceBeforeTax - priceAfterTax);
 
-        const priceBeforeTax = round(item.price - discountRatio * item.price);
+          const parentLine = buildBaseDetail({
+            refId,
+            misaProduct: parentProduct,
+            stock,
+            accountMappingId,
+            sortOrder: index * 10 + 1,
+            quantity: item.qty,
+            amount: 0,
+            priceBeforeTax: 0,
+            priceAfterTax: 0,
+            vatRate: 0,
+            vatAmount: 0,
+            inventoryItemCode: parentProduct.inventory_item_code,
+            inventoryItemName:
+              priceAfterTax === 0
+                ? childProduct.inventory_item_name +
+                  " (Hàng khuyến mãi không thu tiền)"
+                : childProduct.inventory_item_name,
+            isDescription: false,
+          });
 
-        const priceAfterTax = taxRate
-          ? round(priceBeforeTax / (1 + taxRate / 100))
-          : priceBeforeTax;
+          const childLine = buildBaseDetail({
+            refId,
+            misaProduct: childProduct,
+            stock,
+            accountMappingId,
+            sortOrder: index * 10 + 2,
+            quantity: realQty,
+            amount: priceAfterTax * realQty,
+            priceBeforeTax,
+            priceAfterTax,
+            vatRate: taxRate,
+            vatAmount: vatAmount * realQty,
+            inventoryItemCode: childProduct.inventory_item_code,
+            inventoryItemName:
+              priceAfterTax === 0
+                ? childProduct.inventory_item_name +
+                  " (Hàng khuyến mãi không thu tiền)"
+                : childProduct.inventory_item_name,
+            isDescription: true,
+          });
+          // ======================
+          // Bỏ cmt dòng này nếu muốn debug
+          // console.log({ parentLine, childLine });
+          return [parentLine, childLine];
+        })
+      )
+    ).flat();
 
-        const vatAmount = round(priceBeforeTax - priceAfterTax);
+    // Bỏ comment đoạn này nếu muốn debug null field
+    // detail.forEach((d, i) => {
+    //   const nullFields = findNullFields(d);
 
-        return {
-          ref_detail_id: refDetailId,
-          refid: refId,
-          org_refid: refId,
-
-          inventory_item_id: misaProduct.inventory_item_id,
-          inventory_item_code: isCombo
-            ? item.sku
-            : misaProduct.inventory_item_code,
-          inventory_item_name:
-            priceAfterTax === 0
-              ? misaProduct.inventory_item_name +
-                " (Hàng khuyến mãi không thu tiền)"
-              : misaProduct.inventory_item_name,
-          inventory_item_type: 0,
-
-          stock_id: stock.stock_id,
-          stock_code: stock.stock_code,
-          stock_name: stock.stock_name,
-
-          unit_id: misaProduct.unit_id || "Không",
-          unit_name: misaProduct.unit_name || "Không",
-
-          account_object_id: accountMappingId,
-          sort_order: index + 1,
-
-          quantity: finalQty,
-          amount: priceAfterTax * finalQty,
-          amount_oc: priceAfterTax * finalQty,
-
-          discount_rate: null,
-          // discount_amount: index === 0 ? order.totalDiscountPrice || 0 : 0,
-          // discount_amount_oc: index === 0 ? order.totalDiscountPrice || 0 : 0,
-
-          main_quantity: finalQty,
-          main_convert_rate: null,
-          main_unit_id: misaProduct.unit_id,
-          main_unit_name: misaProduct.unit_name,
-          main_unit_price: priceBeforeTax,
-
-          vat_rate: taxRate,
-          vat_amount: vatAmount * finalQty,
-          vat_amount_oc: vatAmount * finalQty,
-
-          description:
-            priceAfterTax === 0
-              ? misaProduct.inventory_item_name +
-                " (Hàng khuyến mãi không thu tiền)"
-              : misaProduct.inventory_item_name,
-
-          exchange_rate_operator: "*",
-          unit_price: priceAfterTax,
-
-          is_promotion: false,
-          is_unit_price_after_tax: false,
-
-          quantity_delivered: 0,
-          quantity_remain: 0,
-          is_description: false,
-
-          discount_type: 1,
-          discount_rate_voucher: 0,
-          state: 1,
-
-          status: 0,
-        };
-      })
-    );
+    //   if (nullFields.length > 0) {
+    //     console.error("❌ DETAIL NULL FIELD");
+    //     console.error("Index:", i);
+    //     console.error("SKU:", d.inventory_item_code);
+    //     console.error("Null fields:", nullFields);
+    //     console.error("FULL OBJECT:", d);
+    //   }
+    // });
 
     const total_amount = detail.reduce((sum, d) => sum + d.amount, 0);
     const total_vat_amount = detail.reduce((sum, d) => sum + d.vat_amount, 0);
@@ -238,7 +386,6 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
       branch_id: "f8088e57-2ec5-4ddc-943e-783179ad001d",
 
-      // customer info
       account_object_id: accountMappingId,
       account_object_address: order.address,
       account_object_name: order.customerName,
@@ -246,7 +393,6 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
       refdate: order.createdAt,
 
-      // ---- Các field bổ sung theo mẫu MISA ----
       status: 0,
       delivered_status: 0,
       due_day: 15,
@@ -271,7 +417,6 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
       auto_refno: true,
       state: 0,
 
-      // money info (dùng tổng detail)
       total_amount_oc: total_amount,
       total_amount: total_amount,
       total_sale_amount: total_amount,
@@ -324,6 +469,77 @@ async function deleteMisaDataService() {
   } catch (err) {
     throw err;
   }
+}
+
+function buildBaseDetail({
+  refId,
+  misaProduct,
+  stock,
+  accountMappingId,
+  sortOrder,
+  quantity,
+  amount,
+  priceBeforeTax,
+  priceAfterTax,
+  vatRate,
+  vatAmount,
+  inventoryItemCode,
+  inventoryItemName,
+  isDescription,
+}) {
+  return {
+    ref_detail_id: crypto.randomUUID(),
+    refid: refId,
+    org_refid: refId,
+
+    inventory_item_id: misaProduct.inventory_item_id,
+    inventory_item_code: inventoryItemCode,
+    inventory_item_name: inventoryItemName,
+    inventory_item_type: 0,
+
+    stock_id: stock.stock_id,
+    stock_code: stock.stock_code,
+    stock_name: stock.stock_name,
+
+    unit_id: misaProduct.unit_id,
+    unit_name: misaProduct.unit_name,
+
+    account_object_id: accountMappingId,
+    sort_order: sortOrder,
+
+    quantity,
+    amount,
+    amount_oc: amount,
+
+    discount_rate: null,
+
+    main_quantity: quantity,
+    main_convert_rate: null,
+    main_unit_id: misaProduct.unit_id,
+    main_unit_name: misaProduct.unit_name,
+    main_unit_price: priceBeforeTax,
+
+    vat_rate: vatRate,
+    vat_amount: vatAmount,
+    vat_amount_oc: vatAmount,
+
+    description: inventoryItemName,
+
+    exchange_rate_operator: "*",
+    unit_price: priceAfterTax,
+
+    is_promotion: false,
+    is_unit_price_after_tax: false,
+
+    quantity_delivered: 0,
+    quantity_remain: 0,
+    is_description: isDescription,
+
+    discount_type: 1,
+    discount_rate_voucher: 0,
+    state: 1,
+    status: 0,
+  };
 }
 
 module.exports = {
