@@ -330,7 +330,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             misaProduct: childProduct,
             stock,
             accountMappingId,
-            //sortOrder: index * 10 + 2,
+            sortOrder: index * 10 + 2,
             quantity: realQty,
             amount: 0,
             priceBeforeTax: 0,
