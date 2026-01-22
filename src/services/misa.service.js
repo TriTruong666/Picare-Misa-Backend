@@ -322,7 +322,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                 ? childProduct.inventory_item_name +
                   " (Hàng khuyến mãi không thu tiền)"
                 : childProduct.inventory_item_name,
-            isDescription: false,
+            isDescription: true,
             reftype: 5,
           });
 
