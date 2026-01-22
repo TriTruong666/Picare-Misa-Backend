@@ -311,11 +311,11 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             accountMappingId,
             sortOrder: index * 10 + 1,
             quantity: item.qty,
-            amount: 0,
-            priceBeforeTax: 0,
-            priceAfterTax: 0,
-            vatRate: 0,
-            vatAmount: 0,
+            amount: priceAfterTax * item.qty,
+            priceBeforeTax,
+            priceAfterTax,
+            vatRate: taxRate,
+            vatAmount: vatAmount * item.qty,
             inventoryItemCode: parentProduct.inventory_item_code,
             inventoryItemName:
               priceAfterTax === 0
@@ -330,20 +330,20 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             misaProduct: childProduct,
             stock,
             accountMappingId,
-            sortOrder: index * 10 + 2,
+            //sortOrder: index * 10 + 2,
             quantity: realQty,
-            amount: priceAfterTax * realQty,
-            priceBeforeTax,
-            priceAfterTax,
-            vatRate: taxRate,
-            vatAmount: vatAmount * realQty,
+            amount: 0,
+            priceBeforeTax: 0,
+            priceAfterTax: 0,
+            vatRate: 0,
+            vatAmount: 0,
             inventoryItemCode: childProduct.inventory_item_code,
             inventoryItemName:
               priceAfterTax === 0
                 ? childProduct.inventory_item_name +
                   " (Hàng khuyến mãi không thu tiền)"
                 : childProduct.inventory_item_name,
-            isDescription: false,
+            isDescription: true,
           });
           // ======================
           // Bỏ cmt dòng này nếu muốn debug
