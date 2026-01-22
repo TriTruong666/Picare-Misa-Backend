@@ -323,7 +323,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                   " (Hàng khuyến mãi không thu tiền)"
                 : childProduct.inventory_item_name,
             isDescription: false,
-            inventory_item_type: 4,
+            inventory_item_type: 5,
           });
 
           const childLine = buildBaseDetail({
