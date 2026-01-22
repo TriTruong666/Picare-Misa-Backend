@@ -323,7 +323,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                   " (Hàng khuyến mãi không thu tiền)"
                 : childProduct.inventory_item_name,
             isDescription: false,
-            reftype: 4,
+            reftype: 5,
           });
 
           const childLine = buildBaseDetail({
@@ -331,7 +331,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             misaProduct: childProduct,
             stock,
             accountMappingId,
-            //sortOrder: index * 10 + 2,
+            sortOrder: index * 10 + 2,
             quantity: realQty,
             amount: 0,
             priceBeforeTax: 0,
@@ -344,7 +344,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                 ? childProduct.inventory_item_name +
                   " (Hàng khuyến mãi không thu tiền)"
                 : childProduct.inventory_item_name,
-            isDescription: true,
+            isDescription: false,
             
           });
           // ======================
