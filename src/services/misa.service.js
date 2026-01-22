@@ -319,11 +319,11 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             inventoryItemCode: parentProduct.inventory_item_code,
             inventoryItemName:
               priceAfterTax === 0
-                ? childProduct.inventory_item_name +
+                ? childProduct.inventory_item_name +" Sản phẩm combo và thông tin hàng ở dòng dưới"+
                   " (Hàng khuyến mãi không thu tiền)"
                 : childProduct.inventory_item_name,
             isDescription: false,
-            inventory_item_type: 5,
+            inventory_item_type: 4,
           });
 
           const childLine = buildBaseDetail({
