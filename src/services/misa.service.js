@@ -308,7 +308,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             : priceBeforeTax;
           const vatAmount = round(priceBeforeTax - priceAfterTax);
           const len = item.sku.length;
-          const parentLine = buildBaseDetail({
+          //const parentLine = buildBaseDetail({
             
             if(len >= 11){
               try {
@@ -318,7 +318,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                   } catch (error) {
               console.error("Lỗi sync data từ webhook:", error);
               }
-              }
+              };
                 
             //refId,
             //misaProduct: parentProduct,
@@ -339,7 +339,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                 //: childProduct.inventory_item_name,
             //isDescription: false,
             //inventory_item_type: 4,
-          });
+          //});
 
           const childLine = buildBaseDetail({
             refId,
