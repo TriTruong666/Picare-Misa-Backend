@@ -310,10 +310,10 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
           const parentLine = buildBaseDetail({
             
-            if(len(parentProduct.inventory_item_code)>=6){
+            if(parentProduct.inventory_item_code.length>=6){
               try {
     const res = await fetchWithRetry(
-      `https://eclatduteint.vn/webhook/ComboMisa?madonhang=` + order.orderId
+      `https://eclatduteint.vn/webhook/ComboMisa?madonhang=${order.orderId}` 
     );
                   } catch (error) {
     console.error("Lỗi sync data từ webhook:", error);
