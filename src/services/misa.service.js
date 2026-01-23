@@ -336,9 +336,9 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             accountMappingId,
             sortOrder: index * 10 + 1,
             quantity: realQty,
-            amount: round(priceAfterTax / realQty) * realQty,
-            priceBeforeTax: round(priceBeforeTax / realQty),
-            priceAfterTax: round(priceAfterTax / realQty),
+            amount: round(priceAfterTax / (realQty/item.qty)) * realQty,
+            priceBeforeTax: round(priceBeforeTax / (realQty/item.qty)),
+            priceAfterTax: round(priceAfterTax / (realQty/item.qty)),
             vatRate: taxRate,
             vatAmount: vatAmount * item.qty,
             inventoryItemCode: childProduct.inventory_item_code,
@@ -355,7 +355,8 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           // ======================
           // Bỏ cmt dòng này nếu muốn debug
           // console.log({ parentLine, childLine });
-          return [parentLine, childLine];
+          //return [parentLine, childLine];
+          return [childLine];
         })
       )
     ).flat();
