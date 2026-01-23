@@ -5,6 +5,7 @@ const MisaProduct = require("../models/misa_product.model");
 const OrderDetail = require("../models/order_detail.model");
 const MisaCombo = require("../models/misa_combo.model");
 const { parseComboSku, findNullFields } = require("../utils/utils");
+const { fetchWithRetry } = require("../utils/utils");
 
 async function connectAmisMisa() {
   try {
@@ -308,6 +309,17 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           const vatAmount = round(priceBeforeTax - priceAfterTax);
 
           const parentLine = buildBaseDetail({
+            
+            if(len(parentProduct.inventory_item_code)>=6){
+              try {
+    const res = await fetchWithRetry(
+      `https://eclatduteint.vn/webhook/ComboMisa?madonhang=` + order.orderId
+    );
+                  } catch (error) {
+    console.error("Lỗi sync data từ webhook:", error);
+  }
+}
+                
             //refId,
             //misaProduct: parentProduct,
             //stock,
