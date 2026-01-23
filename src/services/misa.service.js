@@ -265,6 +265,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                       " (Hàng khuyến mãi không thu tiền)"
                     : product.inventory_item_name,
                 isDescription: false,
+                inventoryitemid:product.inventory_item_id,
               }),
             ];
           }
@@ -345,7 +346,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                   " (Hàng khuyến mãi không thu tiền)"
                 : childProduct.inventory_item_name,
             isDescription: false,
-            
+            inventoryitemid:childProduct.inventory_item_id,
           });
           // ======================
           // Bỏ cmt dòng này nếu muốn debug
@@ -488,13 +489,14 @@ function buildBaseDetail({
   inventoryItemCode,
   inventoryItemName,
   isDescription,
+  inventoryitemid,
 }) {
   return {
     ref_detail_id: crypto.randomUUID(),
     refid: refId,
     org_refid: refId,
 
-    inventory_item_id: misaProduct.inventory_item_id,
+    inventory_item_id: inventoryitemid,
     inventory_item_code: inventoryItemCode,
     inventory_item_name: inventoryItemName,
     inventory_item_type: 0,
