@@ -310,7 +310,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
 
           const parentLine = buildBaseDetail({
             
-            if(parentProduct.inventory_item_code.length >= 6){
+            if(parentProduct.inventory_item_code.length >= 11){
               try {
     const res = await fetchWithRetry(
       `https://eclatduteint.vn/webhook/ComboMisa?madonhang=${order.orderId}` 
