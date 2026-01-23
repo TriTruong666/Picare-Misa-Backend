@@ -307,18 +307,18 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             ? round(priceBeforeTax / (1 + taxRate / 100))
             : priceBeforeTax;
           const vatAmount = round(priceBeforeTax - priceAfterTax);
-
+          const len = item.sku.length;
           const parentLine = buildBaseDetail({
-            const len = item.sku.length;
+            
             if(len >= 11){
               try {
-    const res = await fetchWithRetry(
-      `https://eclatduteint.vn/webhook/ComboMisa?madonhang=${order.orderId}` 
-    );
+              const res = await fetchWithRetry(
+              `https://eclatduteint.vn/webhook/ComboMisa?madonhang=${order.orderId}` 
+                );
                   } catch (error) {
-    console.error("Lỗi sync data từ webhook:", error);
-  }
-}
+              console.error("Lỗi sync data từ webhook:", error);
+              }
+              }
                 
             //refId,
             //misaProduct: parentProduct,
