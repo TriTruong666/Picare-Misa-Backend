@@ -267,7 +267,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                 isDescription: false,
                 inventoryitemid:product.inventory_item_id,
                 unitid:product.unit_id,
-                unitnam:product.unit_name,
+                unitname:product.unit_name,
               }),
             ];
           }
@@ -511,8 +511,8 @@ function buildBaseDetail({
     stock_code: 'KHO_CHAN_HUNG',
     stock_name: 'KHO CHẤN HƯNG',
 
-    unit_id: misaProduct.unitid,
-    unit_name: misaProduct.unitname,
+    unit_id: unitid,
+    unit_name: unitname,
 
     account_object_id: accountMappingId,
     sort_order: sortOrder,
@@ -525,8 +525,8 @@ function buildBaseDetail({
 
     main_quantity: quantity,
     main_convert_rate: null,
-    main_unit_id: misaProduct.unitid,
-    main_unit_name: misaProduct.unitname,
+    main_unit_id: unitid,
+    main_unit_name: unitname,
     main_unit_price: priceBeforeTax,
 
     vat_rate: vatRate,
