@@ -501,9 +501,9 @@ function buildBaseDetail({
     inventory_item_name: inventoryItemName,
     inventory_item_type: 0,
 
-    stock_id: stock.stock_id,
-    stock_code: stock.stock_code,
-    stock_name: stock.stock_name,
+    stock_id: 'ff877de8-f572-4c7f-943d-3be84897209a',
+    stock_code: 'KHO_CHAN_HUNG',
+    stock_name: 'KHO CHẤN HƯNG',
 
     unit_id: misaProduct.unit_id,
     unit_name: misaProduct.unit_name,
