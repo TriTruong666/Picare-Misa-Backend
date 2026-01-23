@@ -309,7 +309,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
           const vatAmount = round(priceBeforeTax - priceAfterTax);
 
           const parentLine = buildBaseDetail({
-            const len = parentProduct.inventory_item_code.length;
+            const len = item.sku.length;
             if(len >= 11){
               try {
     const res = await fetchWithRetry(
