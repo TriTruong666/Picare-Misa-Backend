@@ -314,6 +314,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
               try {
               const res = await fetchWithRetry(
               `https://eclatduteint.vn/webhook/ComboMisa?madonhang=${order.orderId}` 
+                console.log(order.orderId);
                 );
                   } catch (error) {
               console.error("Lỗi sync data từ webhook:", error);
