@@ -20,9 +20,9 @@ const AttendanceUser = require("../models/attendance_user.model");
 const { postSaleDocumentMisaService } = require("../services/misa.service");
 const { delay } = require("../utils/utils");
 
-cron.schedule("*/25 * * * *", async () => cronSyncHaravanOrder());
-cron.schedule("*/30 * * * *", async () => cronBuildDocumentMisa());
-cron.schedule("*/29 * * * *", async () => cronMoveCancelledOrders());
+cron.schedule("40 * * * *", async () => cronSyncHaravanOrder());
+cron.schedule("0 * * * *", async () => cronBuildDocumentMisa());
+cron.schedule("50 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
   sendSse({
     status: "health",
@@ -173,8 +173,8 @@ async function cronMoveCancelledOrders() {
 
 async function cronDeleteOrder() {
   try {
-    const startDate = dayjs().subtract(7, "day").startOf("day").toDate();
-    const endDate = dayjs().subtract(4, "day").endOf("day").toDate();
+    const startDate = dayjs().subtract(23, "day").startOf("day").toDate();
+    const endDate = dayjs().subtract(21, "day").endOf("day").toDate();
 
     const orders = await Order.findAll({
       where: {
@@ -241,7 +241,7 @@ async function cronSyncHaravanOrder() {
 
 async function cronBuildDocumentMisa() {
   try {
-    const startOfDay = dayjs().subtract(9, "day").startOf("day").toDate();
+    const startOfDay = dayjs().subtract(20, "day").startOf("day").toDate();
     const endOfDay = dayjs().endOf("day").toDate();
     let successCount = 0;
     let failedCount = 0;
