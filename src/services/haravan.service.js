@@ -28,7 +28,7 @@ function getLastDaysRangeVN() {
   const max = new Date(now);
   const min = new Date(now);
 
-  min.setDate(now.getDate() - 9);
+  min.setDate(now.getDate() - 20);
 
   const created_at_min = new Date(
     min.getTime() - min.getTimezoneOffset() * 60000
