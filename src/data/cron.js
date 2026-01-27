@@ -20,7 +20,7 @@ const AttendanceUser = require("../models/attendance_user.model");
 const { postSaleDocumentMisaService } = require("../services/misa.service");
 const { delay } = require("../utils/utils");
 
-cron.schedule("40 * * * *", async () => cronSyncHaravanOrder());
+cron.schedule("30 * * * *", async () => cronSyncHaravanOrder());
 cron.schedule("0 * * * *", async () => cronBuildDocumentMisa());
 cron.schedule("50 * * * *", async () => cronMoveCancelledOrders());
 cron.schedule("*/30 * * * * *", () => {
