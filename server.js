@@ -46,7 +46,9 @@ app.use("/api/misa", misaRoutes);
     await sequelize.authenticate();
     console.log("Đã kết nối với Postgres thông qua Sequelize");
 
-    await sequelize.sync({ force: true });
+    //await sequelize.sync({ force: true });
+    await sequelize.sync();
+    
     console.log("Tất cả Models đã được đồng bộ hoá");
 
     await seedingUsers();
