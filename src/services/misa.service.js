@@ -69,7 +69,7 @@ const sourceCustomerAccountObjectIdMap = {
   "Tiki": "920fa0ab-d5fa-4216-9a92-7315adcd73c2",
   "Tiktok Shop": "32f05ee1-d1b8-428a-905f-67914716f904",
   "Shopee Malay": "bf274386-3c11-4932-99b2-2d7baa0c0e97",
-  "Shopee Phil": "a0c927f5-4ce2-4511-936e-3edb62fa6267",
+  "Shopee Philipin": "a0c927f5-4ce2-4511-936e-3edb62fa6267",
 };
 
 const sourceCustomerAccountObjectCodeMap = {
@@ -80,7 +80,7 @@ const sourceCustomerAccountObjectCodeMap = {
   "Tiki": "KHACHLE_TIKI PICARE",
   "Tiktok Shop": "KHACHLE_TIKTOK PICARE",
   "Shopee Malay": "KHACHLE_SHOPEE MALAY",
-  "Shopee Phil": "KHACHLE_SHOPEE PHILIPIN",
+  "Shopee Philipin": "KHACHLE_SHOPEE PHILIPIN",
 };
 
 async function getCustomerFromSource(orderSource) {
