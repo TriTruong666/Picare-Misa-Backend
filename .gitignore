@@ -18,3 +18,7 @@ account-service.json
 # Docker
 docker-compose.yml
 Dockerfile
+
+# AI
+.zencoder
+.zenflow
