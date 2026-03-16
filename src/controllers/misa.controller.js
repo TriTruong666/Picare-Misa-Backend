@@ -131,6 +131,7 @@ class MisaController {
         refDetailId,
         address: order.address,
         customerName: order.customerName,
+        companyName: order.companyName,
       });
 
       await order.update({ status: "completed" });
