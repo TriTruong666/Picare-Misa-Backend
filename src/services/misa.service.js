@@ -66,7 +66,7 @@ const sourceCustomerAccountObjectIdMap = {
   "Shopee Easydew": "76fda269-328d-4bc7-9755-0d01b05d8ccc",
   "Lazada Picare": "984b48e2-5de1-4427-bffd-7098977ed124",
   "Lazada Easydew": "50f1c0d5-8af2-4ba4-9865-cc272e235d65",
-  "Tiki": "920fa0ab-d5fa-4216-9a92-7315adcd73c2",
+  Tiki: "920fa0ab-d5fa-4216-9a92-7315adcd73c2",
   "Tiktok Shop": "32f05ee1-d1b8-428a-905f-67914716f904",
   "Shopee Malay": "bf274386-3c11-4932-99b2-2d7baa0c0e97",
   "Shopee Philipin": "a0c927f5-4ce2-4511-936e-3edb62fa6267",
@@ -77,7 +77,7 @@ const sourceCustomerAccountObjectCodeMap = {
   "Shopee Easydew": "KHACHLE_SHOPEE EASYDEW",
   "Lazada Picare": "KHACHLE_LAZADA PICARE",
   "Lazada Easydew": "KHACHLE_LAZADA EASYDEW",
-  "Tiki": "KHACHLE_TIKI PICARE",
+  Tiki: "KHACHLE_TIKI PICARE",
   "Tiktok Shop": "KHACHLE_TIKTOK PICARE",
   "Shopee Malay": "KHACHLE_SHOPEE MALAY",
   "Shopee Philipin": "KHACHLE_SHOPEE PHILIPIN",
@@ -118,110 +118,6 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
     const giagiam = order.totalDiscountPrice;
     const tongdon = order.totalLineItemPrice;
     const discountRatio = tongdon > 0 ? giagiam / tongdon : 0;
-    // const detail = await Promise.all(
-    //   order.line_items.map(async (item, index) => {
-    //     const { isCombo, baseSku, multiplier } = parseComboSku(item.sku);
-
-    //     const misaProduct = await MisaProduct.findOne({
-    //       where: { inventory_item_code: baseSku },
-    //     });
-
-    //     if (!misaProduct) {
-    //       throw new Error(`Không tìm thấy MisaProduct cho SKU gốc: ${baseSku}`);
-    //     }
-
-    //     let finalQty = item.qty;
-
-    //     if (isCombo) {
-    //       const combo = await MisaCombo.findOne({
-    //         where: { inventoryItemCode: baseSku },
-    //       });
-
-    //       if (!combo) {
-    //         throw new Error(`Không tìm thấy combo cho SKU: ${baseSku}`);
-    //       }
-
-    //       finalQty = item.qty * combo.quantity * multiplier;
-    //     }
-
-    //     const taxRate = misaProduct.tax_rate || 0;
-    //     const round = (n) => Math.round(n * 100) / 100;
-
-    //     const priceBeforeTax = round(item.price - discountRatio * item.price);
-    //     const priceAfterTax = taxRate
-    //       ? round(priceBeforeTax / (1 + taxRate / 100))
-    //       : priceBeforeTax;
-
-    //     const vatAmount = round(priceBeforeTax - priceAfterTax);
-
-    //     return {
-    //       ref_detail_id: crypto.randomUUID(),
-    //       refid: refId,
-    //       org_refid: refId,
-
-    //       inventory_item_id: misaProduct.inventory_item_id,
-    //       inventory_item_code: isCombo
-    //         ? item.sku
-    //         : misaProduct.inventory_item_code,
-    //       inventory_item_name:
-    //         priceAfterTax === 0
-    //           ? misaProduct.inventory_item_name +
-    //             " (Hàng khuyến mãi không thu tiền)"
-    //           : misaProduct.inventory_item_name,
-    //       inventory_item_type: 0,
-
-    //       stock_id: stock.stock_id,
-    //       stock_code: stock.stock_code,
-    //       stock_name: stock.stock_name,
-
-    //       unit_id: misaProduct.unit_id || "Không",
-    //       unit_name: misaProduct.unit_name || "Không",
-
-    //       account_object_id: accountMappingId,
-    //       sort_order: index + 1,
-
-    //       quantity: finalQty,
-    //       amount: priceAfterTax * finalQty,
-    //       amount_oc: priceAfterTax * finalQty,
-
-    //       discount_rate: null,
-    //       // discount_amount: index === 0 ? order.totalDiscountPrice || 0 : 0,
-    //       // discount_amount_oc: index === 0 ? order.totalDiscountPrice || 0 : 0,
-
-    //       main_quantity: finalQty,
-    //       main_convert_rate: null,
-    //       main_unit_id: misaProduct.unit_id,
-    //       main_unit_name: misaProduct.unit_name,
-    //       main_unit_price: priceBeforeTax,
-
-    //       vat_rate: taxRate,
-    //       vat_amount: vatAmount * finalQty,
-    //       vat_amount_oc: vatAmount * finalQty,
-
-    //       description:
-    //         priceAfterTax === 0
-    //           ? misaProduct.inventory_item_name +
-    //             " (Hàng khuyến mãi không thu tiền)"
-    //           : misaProduct.inventory_item_name,
-
-    //       exchange_rate_operator: "*",
-    //       unit_price: priceAfterTax,
-
-    //       is_promotion: false,
-    //       is_unit_price_after_tax: false,
-
-    //       quantity_delivered: 0,
-    //       quantity_remain: 0,
-    //       is_description: false,
-
-    //       discount_type: 1,
-    //       discount_rate_voucher: 0,
-    //       state: 1,
-
-    //       status: 0,
-    //     };
-    //   })
-    // );
 
     const detail = (
       await Promise.all(
@@ -270,9 +166,9 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                       " (Hàng khuyến mãi không thu tiền)"
                     : product.inventory_item_name,
                 isDescription: false,
-                inventoryitemid:product.inventory_item_id,
-                unitid:product.unit_id,
-                unitname:product.unit_name,
+                inventoryitemid: product.inventory_item_id,
+                unitid: product.unit_id,
+                unitname: product.unit_name,
               }),
             ];
           }
@@ -312,39 +208,6 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             : priceBeforeTax;
           const vatAmount = round(priceBeforeTax - priceAfterTax);
           const len = item.sku.length;
-          //const parentLine = buildBaseDetail({
-            
-            if(len >= 11 || baseSku === 'PAK001' || baseSku === 'PAK002'){
-              try {
-              const res = await fetchWithRetry(
-              `https://eclatduteint.vn/webhook/ComboMisa?madonhang=${order.orderId}` 
-                
-                );
-                  } catch (error) {
-              console.error("Lỗi sync data từ webhook:", error);
-              }
-              };
-                
-            //refId,
-            //misaProduct: parentProduct,
-            //stock,
-            //accountMappingId,
-            //sortOrder: index * 10 + 1,
-            //quantity: item.qty,
-            //amount: priceAfterTax * item.qty,
-            //priceBeforeTax,
-            //priceAfterTax,
-            //vatRate: taxRate,
-            //vatAmount: vatAmount * item.qty,
-            //inventoryItemCode: parentProduct.inventory_item_code,
-            //inventoryItemName:
-              //priceAfterTax === 0
-                //? childProduct.inventory_item_name +" Sản phẩm combo và thông tin hàng ở dòng dưới"+
-                  //" (Hàng khuyến mãi không thu tiền)"
-                //: childProduct.inventory_item_name,
-            //isDescription: false,
-            //inventory_item_type: 4,
-          //});
 
           const childLine = buildBaseDetail({
             refId,
@@ -353,9 +216,9 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
             accountMappingId,
             sortOrder: index * 10 + 1,
             quantity: realQty,
-            amount: round(priceAfterTax / (realQty/item.qty)) * realQty,
-            priceBeforeTax: round(priceBeforeTax / (realQty/item.qty)),
-            priceAfterTax: round(priceAfterTax / (realQty/item.qty)),
+            amount: round(priceAfterTax / (realQty / item.qty)) * realQty,
+            priceBeforeTax: round(priceBeforeTax / (realQty / item.qty)),
+            priceAfterTax: round(priceAfterTax / (realQty / item.qty)),
             vatRate: taxRate,
             vatAmount: vatAmount * item.qty,
             inventoryItemCode: childProduct.inventory_item_code,
@@ -365,7 +228,7 @@ async function postSaleDocumentMisaService(accessToken, { orderId }) {
                   " (Hàng khuyến mãi không thu tiền)"
                 : childProduct.inventory_item_name,
             isDescription: false,
-            inventoryitemid:childProduct.inventory_item_id,
+            inventoryitemid: childProduct.inventory_item_id,
             unitid: childProduct.unit_id,
             unitname: childProduct.unit_name,
           });
@@ -498,8 +361,6 @@ async function deleteMisaDataService() {
 
 function buildBaseDetail({
   refId,
-  misaProduct,
-  stock,
   accountMappingId,
   sortOrder,
   quantity,
@@ -525,9 +386,9 @@ function buildBaseDetail({
     inventory_item_name: inventoryItemName,
     inventory_item_type: 0,
 
-    stock_id: 'ff877de8-f572-4c7f-943d-3be84897209a',
-    stock_code: 'KHO_CHAN_HUNG',
-    stock_name: 'KHO CHẤN HƯNG',
+    stock_id: "ff877de8-f572-4c7f-943d-3be84897209a",
+    stock_code: "KHO_CHAN_HUNG",
+    stock_name: "KHO CHẤN HƯNG",
 
     unit_id: unitid,
     unit_name: unitname,

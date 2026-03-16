@@ -272,7 +272,9 @@ async function runSyncHaravanOrders() {
         cancelledStatus: hvOrder.cancelled_status,
         totalPrice: parseFloat(hvOrder.total_price),
         totalLineItemPrice: parseFloat(hvOrder.total_line_items_price),
-        totalDiscountPrice: parseFloat(hvOrder.discount_codes?.[0]?.amount || 0),
+        totalDiscountPrice: parseFloat(
+          hvOrder.discount_codes?.[0]?.amount || 0
+        ),
         trackingNumber: hvOrder.fulfillments?.[0]?.tracking_number || null,
         address: `${
           hvOrder.shipping_address.address1 || "Không có địa chỉ cụ thể"
@@ -280,6 +282,7 @@ async function runSyncHaravanOrders() {
           hvOrder.shipping_address.district || ""
         } ${hvOrder.shipping_address.province || ""}`,
         customerName: hvOrder.shipping_address.name,
+        companyName: "Picare",
       };
 
       try {

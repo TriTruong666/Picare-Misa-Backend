@@ -102,6 +102,20 @@ const EbizMisaDone = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    customerName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "customer_name",
+    },
+    companyName: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      field: "company_name",
+    },
     note: {
       type: DataTypes.TEXT,
     },

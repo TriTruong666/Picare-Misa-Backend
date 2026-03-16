@@ -47,7 +47,7 @@ app.use("/api/misa", misaRoutes);
     console.log("Đã kết nối với Postgres thông qua Sequelize");
 
     //await sequelize.sync({ force: true });
-    await sequelize.sync({});
+    await sequelize.sync({ alter: true });
 
     console.log("Tất cả Models đã được đồng bộ hoá");
 
@@ -59,7 +59,6 @@ app.use("/api/misa", misaRoutes);
     const PORT = process.env.SERVER_PORT || 8686;
     app.listen(PORT, () => {
       console.log(`Server Picare đang khởi chạy tại cổng ${PORT}`);
-      console.log(`Test Deploy 1`);
     });
   } catch (err) {
     console.error("Không thể kết nối tới DB:", err);

@@ -65,7 +65,7 @@ async function fetchAllHaravanOrders(limit = 50) {
     const total = await countOrdersLastWeek();
     const totalPages = Math.ceil(total / limit);
 
-    console.log(`📦 Tổng ${total} đơn hàng, chia thành ${totalPages} trang`);
+    console.log(`Tổng ${total} đơn hàng, chia thành ${totalPages} trang`);
 
     let allOrders = [];
 
