@@ -253,7 +253,7 @@ async function cronBuildDocumentMisa() {
           [Op.or]: ["pending", "stock", "invoice"],
         },
         carrierStatus: {
-          [Op.or]: ["delivered", "delivering"],
+          [Op.or]: ["delivered"],
         },
         realCarrierStatus: "success",
         cancelledStatus: "uncancelled",
